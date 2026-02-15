@@ -1,0 +1,306 @@
+﻿<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoMarket Pro - Запчастҳо</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --primary: #1a252f; --accent: #f39c12; --success: #27ae60; --danger: #e74c3c; --light: #ecf0f1; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f8f9fa; color: #333; }
+        
+        nav { background: var(--primary); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .nav-links a:hover { color: var(--accent); }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        
+        /* Search Bar Style */
+        .search-box { margin-bottom: 25px; width: 100%; position: relative; }
+        .search-box input { width: 100%; padding: 15px 20px; border-radius: 10px; border: 1px solid #ddd; font-size: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); outline: none; transition: 0.3s; }
+        .search-box input:focus { border-color: var(--accent); box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2); }
+
+        .stats-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stat-item { flex: 1; text-align: center; border-right: 1px solid #eee; }
+        .stat-item:last-child { border: none; }
+        .stat-value { display: block; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 0.8rem; color: #7f8c8d; }
+
+        .ads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08); transition: transform 0.3s; position: relative; border: 1px solid #eee; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-body { padding: 18px; }
+        .card-tag { background: var(--accent); color: white; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; position: absolute; top: 10px; left: 10px; z-index: 10; }
+        
+        .price { font-size: 1.4rem; color: var(--success); font-weight: bold; margin: 10px 0; }
+        .info-row { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #555; margin-bottom: 5px; }
+        
+        .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; display: block; text-align: center; text-decoration: none; margin-top: 15px; transition: 0.3s; }
+        .btn-main:hover { background: #2c3e50; }
+
+        .admin-panel { background: #fff3e0; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 2px solid var(--accent); }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        .hidden { display: none !important; }
+        .modal { background: white; padding: 30px; border-radius: 20px; max-width: 500px; margin: 40px auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div style="font-size: 1.5rem; font-weight: bold;">Auto<span style="color:var(--accent)">Market</span></div>
+    <div class="nav-links">
+        <a onclick="app.showPage('home')">🏠 Асосӣ</a>
+        <a onclick="app.showPage('add')" id="addBtn" class="hidden">➕ Эълон</a>
+        <a onclick="app.showPage('login')" id="loginLink">🔑 Воридшавӣ</a>
+        <span id="userInfo" style="font-size: 0.85rem; color: #bdc3c7;"></span>
+        <a onclick="app.logout()" id="logoutLink" class="hidden">🚪 Баромад</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div id="statsSection" class="stats-bar hidden">
+        <div class="stat-item">
+            <span class="stat-value" id="totalItems">0</span>
+            <span class="stat-label">Миқдори ашё</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value" id="totalSum">0 c.</span>
+            <span class="stat-label">Маблағи умумӣ</span>
+        </div>
+    </div>
+
+    <div id="searchArea" class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Ҷустуҷӯ аз рӯи ном ё тамғаи мошин..." onkeyup="app.filterProducts()">
+    </div>
+
+    <div id="adminPanel" class="admin-panel hidden">
+        <h3 style="margin-top:0">🛠 Панели Идоракунӣ</h3>
+        <div id="pendingUsersList"></div>
+    </div>
+
+    <div id="homePage">
+        <div id="adsGrid" class="ads-grid"></div>
+    </div>
+
+    <div id="loginPage" class="hidden">
+        <div class="modal">
+            <h2>Хуш омадед!</h2>
+            <input type="text" id="regName" placeholder="Номи пурра" style="margin-bottom:10px;">
+            <input type="number" id="regPhone" placeholder="Рақами телефон">
+            <button class="btn-main" onclick="app.handleAuth()" style="background:var(--success)">Ворид шудан</button>
+        </div>
+    </div>
+
+    <div id="addPage" class="hidden">
+        <div class="modal">
+            <h2 style="margin-bottom:20px">📦 Эълони нав</h2>
+            <div class="input-group">
+                <label>Тамғаи мошин</label>
+                <select id="pCarModel">
+                    <option value="Opel">Opel</option>
+                    <option value="Toyota">Toyota</option>
+                    <option value="Mercedes-Benz">Mercedes-Benz</option>
+                    <option value="BMW">BMW</option>
+                    <option value="Hyundai">Hyundai</option>
+                    <option value="Kia">Kia</option>
+                    <option value="LADA">LADA</option>
+                    <option value="Дигар">Дигар...</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Номи запчаст</label>
+                <input type="text" id="pName" placeholder="Масалан: Радиатор">
+            </div>
+            <div class="input-group">
+                <label>Нарх (бо сомонӣ)</label>
+                <input type="number" id="pPrice">
+            </div>
+            <div class="input-group">
+                <label>Миқдор (дар склад)</label>
+                <input type="number" id="pQty" value="1">
+            </div>
+            <div class="input-group">
+                <label>Доставка</label>
+                <input type="text" id="pDelivery" placeholder="Масалан: Душанбе - Хуҷанд">
+            </div>
+            <div class="input-group">
+                <label>Сурат</label>
+                <input type="file" id="pImg" accept="image/*">
+            </div>
+            <button class="btn-main" onclick="app.addProduct()" style="background:var(--accent)">Нашр кардан</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ADMIN_PHONE = "933099029"; 
+    const firebaseConfig = {
+        apiKey: "AIzaSy...", 
+        authDomain: "automarkettj.firebaseapp.com",
+        databaseURL: "https://automarkettj-default-rtdb.firebaseio.com/",
+        projectId: "automarkettj",
+        storageBucket: "automarkettj.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const app = {
+        currentUser: JSON.parse(localStorage.getItem('activeUser')),
+        allProducts: [], // Махзан барои ҷустуҷӯ
+
+        init() {
+            this.checkUserStatus();
+            this.loadProducts();
+            if(this.currentUser?.phone === ADMIN_PHONE) {
+                this.loadAdminPanel();
+                document.getElementById('statsSection').classList.remove('hidden');
+            }
+        },
+
+        showPage(pageId) {
+            ['home', 'login', 'add'].forEach(p => document.getElementById(p + 'Page').classList.add('hidden'));
+            document.getElementById(pageId + 'Page').classList.remove('hidden');
+            document.getElementById('searchArea').classList.toggle('hidden', pageId !== 'home');
+            window.scrollTo(0,0);
+        },
+
+        async handleAuth() {
+            const name = document.getElementById('regName').value;
+            const phone = document.getElementById('regPhone').value;
+            if(!phone) return alert("Рақамро нависед!");
+            const snap = await db.ref('users/' + phone).once('value');
+            const user = snap.val();
+            if (user) { this.login(user); } else {
+                if(!name) return alert("Ном лозим аст!");
+                const newUser = { name, phone, status: 'pending' };
+                await db.ref('users/' + phone).set(newUser);
+                this.login(newUser);
+            }
+        },
+
+        login(user) { localStorage.setItem('activeUser', JSON.stringify(user)); location.reload(); },
+        logout() { localStorage.removeItem('activeUser'); location.reload(); },
+
+        checkUserStatus() {
+            if(!this.currentUser) return;
+            document.getElementById('logoutLink').classList.remove('hidden');
+            document.getElementById('userInfo').innerText = `👤 ${this.currentUser.name}`;
+            db.ref('users/' + this.currentUser.phone).on('value', snap => {
+                const u = snap.val();
+                if(u?.status === 'active') document.getElementById('addBtn').classList.remove('hidden');
+            });
+        },
+
+        async addProduct() {
+            const file = document.getElementById('pImg').files[0];
+            let imgData = "";
+            if(file) {
+                imgData = await new Promise(r => {
+                    const reader = new FileReader();
+                    reader.onload = () => r(reader.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+            const product = {
+                carModel: document.getElementById('pCarModel').value,
+                name: document.getElementById('pName').value,
+                price: parseFloat(document.getElementById('pPrice').value),
+                qty: parseInt(document.getElementById('pQty').value),
+                delivery: document.getElementById('pDelivery').value,
+                img: imgData,
+                sellerPhone: this.currentUser.phone,
+                sellerName: this.currentUser.name,
+                date: new Date().toLocaleDateString()
+            };
+            await db.ref('products').push(product);
+            this.showPage('home');
+        },
+
+        loadProducts() {
+            db.ref('products').on('value', snap => {
+                this.allProducts = [];
+                snap.forEach(child => {
+                    const p = child.val();
+                    p.id = child.key;
+                    this.allProducts.push(p);
+                });
+                this.renderProducts(this.allProducts);
+            });
+        },
+
+        renderProducts(productsList) {
+            const grid = document.getElementById('adsGrid');
+            let totalQty = 0;
+            let totalMoney = 0;
+            grid.innerHTML = "";
+
+            productsList.forEach(p => {
+                totalQty += (p.qty || 0);
+                totalMoney += (p.price * (p.qty || 1));
+                const isOwner = this.currentUser && (this.currentUser.phone === p.sellerPhone || this.currentUser.phone === ADMIN_PHONE);
+                
+                grid.innerHTML += `
+                    <div class="card">
+                        <span class="card-tag">${p.carModel}</span>
+                        <img src="${p.img || 'https://via.placeholder.com/300x200?text=No+Image'}">
+                        <div class="card-body">
+                            ${isOwner ? `<button onclick="app.deleteP('${p.id}')" style="float:right; border:none; background:none; cursor:pointer; font-size:1.2rem">🗑️</button>` : ''}
+                            <h3 style="margin:0 0 10px 0; font-size:1.1rem">${p.name}</h3>
+                            <div class="price">${p.price} c.</div>
+                            <div class="info-row">📦 <b>Миқдор:</b> ${p.qty || 1} адад</div>
+                            <div class="info-row">🚚 <b>Доставка:</b> ${p.delivery || 'Надорад'}</div>
+                            <div class="info-row">👤 <b>Фурӯшанда:</b> ${p.sellerName}</div>
+                            <div class="info-row">📅 <b>Сана:</b> ${p.date || '-'}</div>
+                            <a href="tel:${p.sellerPhone}" class="btn-main">📞 Тамос гирифтан</a>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('totalItems').innerText = totalQty;
+            document.getElementById('totalSum').innerText = totalMoney.toLocaleString() + " c.";
+        },
+
+        // Функсияи ҷустуҷӯ
+        filterProducts() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = this.allProducts.filter(p => 
+                p.name.toLowerCase().includes(term) || 
+                p.carModel.toLowerCase().includes(term)
+            );
+            this.renderProducts(filtered);
+        },
+
+        loadAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('hidden');
+            db.ref('users').on('value', snap => {
+                const list = document.getElementById('pendingUsersList');
+                list.innerHTML = "";
+                snap.forEach(c => {
+                    const u = c.val();
+                    if(u.status === 'pending') {
+                        list.innerHTML += `
+                            <div class="user-row">
+                                <span><b>${u.name}</b> (${u.phone})</span>
+                                <button onclick="app.approveUser('${u.phone}')" style="background:var(--success); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer">✅ Тасдиқ</button>
+                            </div>`;
+                    }
+                });
+            });
+        },
+
+        approveUser(phone) { db.ref('users/' + phone).update({ status: 'active' }); },
+        deleteP(id) { if(confirm("Эълон нест карда шавад?")) db.ref('products/' + id).remove(); }
+    };
+
+    app.init();
+</script>
+</body>
+</html>
