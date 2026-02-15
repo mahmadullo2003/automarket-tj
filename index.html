@@ -103,7 +103,7 @@ style="color:var(--accent)">Market</span></div>
     <div id="searchArea" class="search-box">
         <input type="text" id="searchInput" placeholder="🔍 Номи запчаст ё мошин..." onkeyup="app.filterProducts()">
         <select id="typeFilter" onchange="app.filterProducts()">
-            <option value="">Ҳамаи типҳо</option>
+            <option value="">намуд</option>
             <option value="Ходовой">Ходовой</option>
             <option value="Электронӣ">Электронӣ</option>
             <option value="Мотор">Мотор</option>
@@ -115,7 +115,7 @@ style="color:var(--accent)">Market</span></div>
         <div style="display:flex; justify-content:space-between; align-items:center">
             <h3 style="margin-top:0">👥 Идоракунии Истифодабарандагон (Админ)</h3>
             <div style="text-align:right">
-                <span style="color:#2196f3; font-weight:bold">Суммаи умумии база: </span>
+                <span style="color:#2196f3; font-weight:bold">Маблағи умумии база: </span>
                 <span id="adminGrandTotal" style="color:var(--success); font-size:1.2rem; font-weight:bold">0 c.</span>
             </div>
         </div>
@@ -130,7 +130,7 @@ style="color:var(--accent)">Market</span></div>
         <div class="modal">
             <h2>Воридшавӣ</h2>
             <input type="text" id="regName" placeholder="Номи пурра">
-            <input type="number" id="regPhone" placeholder="933XXXXXX">
+            <input type="number" id="regPhone" placeholder="рақами телефон">
             <button onclick="app.handleAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--success); 
 
 color:white; border:none; border-radius:8px; cursor:pointer">Давом додан</button>
@@ -152,6 +152,16 @@ color:white; border:none; border-radius:8px; cursor:pointer">Давом дода
                 <option value="Kia">Kia</option>
                 <option value="SsangYong">SsangYong</option>
                 <option value="LADA">LADA</option>
+                <option value="Volkswagen">Volkswagen</option>
+                <option value="Honda">Honda</option>
+                <option value="Lexus">Lexus</option>
+                <option value="Nissan">Nissan</option>
+                <option value="Mitsubishi">Mitsubishi</option>
+                <option value="Ford">Ford</option>
+                <option value="Chevrolet">Chevrolet</option>
+                <option value="Audi">Audi</option>
+                <option value="Mazda">Mazda</option>
+                <option value="Land Rover">Land Rover</option>
             </select>
 
             <label>Модели мошин</label>
@@ -183,7 +193,7 @@ color:white; border:none; border-radius:8px; cursor:pointer">Давом дода
             <label>Доставка (аз - то)</label>
             <input type="text" id="pDelivery" placeholder="Масалан: Хуҷанд - Душанбе">
 
-            <label>Мӯҳлати кафолат (бо рӯз)</label>
+            <label>Мӯҳлати кафолат (маълумот \рӯз)</label>
             <input type="number" id="pWarranty" placeholder="Масалан: 30">
 
             <label>Сурат</label>
@@ -197,7 +207,7 @@ color:white; border:none; border-radius:8px; cursor:pointer">Нашр карда
 </div>
 
 <script>
-    const ADMIN_PHONE = "933099029"; 
+    const ADMIN_PHONE = "25092003933099029"; 
     const firebaseConfig = {
         apiKey: "AIzaSy...", 
         authDomain: "automarkettj.firebaseapp.com",
@@ -223,7 +233,17 @@ color:white; border:none; border-radius:8px; cursor:pointer">Нашр карда
             "Hyundai": ["Elantra", "Sonata", "Solaris", "Accent", "Tucson", "Santa Fe"],
             "Kia": ["Optima", "K5", "Rio", "Sportage", "Sorento"],
             "SsangYong": ["Musso", "Korando", "Rexton", "Kyron"],
-            "LADA": ["Priora", "Vesta", "Granta", "Niva", "2107", "2114"]
+            "LADA": ["Priora", "Vesta", "Granta", "Niva", "2107", "2114"],
+            "Volkswagen": ["Golf", "Jetta", "Passat", "Polo", "Touareg", "Tiguan"],
+            "Honda": ["Civic", "Accord", "CR-V", "Fit", "Insight", "HR-V"],
+            "Lexus": ["RX350", "GX470", "LX570", "IS250", "ES350", "LS460"],
+            "Nissan": ["Altima", "Sentra", "Patrol", "Qashqai", "X-Trail", "Juke"],
+            "Mitsubishi": ["Pajero", "Lancer", "Outlander", "ASX", "Montero Sport", "Galant"],
+            "Ford": ["Focus", "Fusion", "Explorer", "Mustang", "F-150", "Escape"],
+            "Chevrolet": ["Aveo", "Lacetti", "Cobalt", "Captiva", "Malibu", "Cruze"],
+            "Audi": ["A4", "A6", "A8", "Q5", "Q7", "100"],          
+            "Mazda": ["Mazda 3", "Mazda 6", "CX-5", "CX-9", "RX-8", "MPV"], 
+            "Land Rover": ["Range Rover", "Range Rover Sport", "Discovery", "Freelander", "Evoque", "Defender"]
         },
 
         init() {
@@ -449,3 +469,4 @@ border:none; background:none; font-size:1.2rem">❌</button>
 </script>
 </body>
 </html>
+
