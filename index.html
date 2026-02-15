@@ -97,10 +97,22 @@
 
     <div id="loginPage" class="hidden">
         <div class="modal">
-            <h2>Воридшавӣ</h2>
-            <input type="text" id="regName" placeholder="Номи пурра">
-            <input type="number" id="regPhone" placeholder="933XXXXXX">
-            <button onclick="app.handleAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--success); color:white; border:none; border-radius:8px; cursor:pointer">Давом додан</button>
+            <h2 id="loginTitle">Воридшавӣ</h2>
+            <div id="userLoginFields">
+                <input type="text" id="regName" placeholder="Номи пурра">
+                <input type="number" id="regPhone" placeholder="Рақами телефон (933XXXXXX)">
+                <input type="password" id="regPass" placeholder="Рамзи дастрасӣ (Access Code)">
+                <p style="font-size: 0.75rem; color: #666;">* Агар рамз надоред, ба админ муроҷиат кунед.</p>
+                <button onclick="app.handleAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--success); color:white; border:none; border-radius:8px; cursor:pointer">Давом додан</button>
+            </div>
+            <hr>
+            <button onclick="app.toggleAdminLogin()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:0.8rem">🔓 Ман Админ ҳастам</button>
+            
+            <div id="adminLoginFields" class="hidden">
+                <input type="text" id="adminUser" placeholder="Логини Админ">
+                <input type="password" id="adminPass" placeholder="Пароли Админ">
+                <button onclick="app.handleAdminAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer">Ворид шудан ба Панел</button>
+            </div>
         </div>
     </div>
 
@@ -141,6 +153,9 @@
                 <option value="Бохтар">Бохтар</option>
                 <option value="Кӯлоб">Кӯлоб</option>
             </select>
+            <label>Санаи нашр</label>
+            <input type="date" id="pAdDate">
+            
             <label>Маълумот</label>
             <textarea id="pDesc" placeholder="Ҳолати запчаст..."></textarea>
             <label>Сурат</label>
@@ -151,19 +166,19 @@
 </div>
 
 <script>
-    const ADMIN_PHONE = "933099029."; // Рақами админро ин ҷо ислоҳ кунед
-    
-    // ДИҚҚАТ: Ин ҷо бояд маълумоти Firebase-и худро гузоред
-   const firebaseConfig = {
-  apiKey: "AIzaSyCOYjoU34k2CDWVZd7D4XvhXAwgFK_LxlE",
-  authDomain: "automarkettj.firebaseapp.com",
-  databaseURL: "https://automarkettj-default-rtdb.firebaseio.com",
-  projectId: "automarkettj",
-  storageBucket: "automarkettj.firebasestorage.app",
-  messagingSenderId: "614498527268",
-  appId: "1:614498527268:web:ff06a8f246df42ac1ad0b1",
-  measurementId: "G-1PXXWX9TT2"
-};
+    // Танзимоти махсуси Админ
+    const ADMIN_CRED = { user: "admin", pass: "25092003" };
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCOYjoU34k2CDWVZd7D4XvhXAwgFK_LxlE",
+        authDomain: "automarkettj.firebaseapp.com",
+        databaseURL: "https://automarkettj-default-rtdb.firebaseio.com",
+        projectId: "automarkettj",
+        storageBucket: "automarkettj.firebasestorage.app",
+        messagingSenderId: "614498527268",
+        appId: "1:614498527268:web:ff06a8f246df42ac1ad0b1",
+        measurementId: "G-1PXXWX9TT2"
+    };
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -186,7 +201,14 @@
             this.fillYears();
             this.checkUserStatus();
             this.loadProducts();
-            if(this.currentUser?.phone === ADMIN_PHONE) this.loadAdminUsers();
+            this.setDefaultDate();
+            if(this.currentUser?.isAdmin) this.loadAdminUsers();
+        },
+
+        setDefaultDate() {
+            const now = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('pAdDate');
+            if(dateInput) dateInput.value = now;
         },
 
         showPage(id) {
@@ -211,15 +233,42 @@
             }
         },
 
+        toggleAdminLogin() {
+            document.getElementById('userLoginFields').classList.toggle('hidden');
+            document.getElementById('adminLoginFields').classList.toggle('hidden');
+            document.getElementById('loginTitle').innerText = 
+                document.getElementById('adminLoginFields').classList.contains('hidden') ? "Воридшавӣ" : "Вуруди Админ";
+        },
+
+        async handleAdminAuth() {
+            const u = document.getElementById('adminUser').value;
+            const p = document.getElementById('adminPass').value;
+            if(u === ADMIN_CRED.user && p === ADMIN_CRED.pass) {
+                const adminData = { name: "Администратор", isAdmin: true, phone: "ADMIN" };
+                localStorage.setItem('activeUser', JSON.stringify(adminData));
+                location.reload();
+            } else { alert("Логин ё Пароли хато!"); }
+        },
+
         async handleAuth() {
             const name = document.getElementById('regName').value;
             const phone = document.getElementById('regPhone').value;
-            if(!phone || !name) return alert("Пур кунед!");
+            const pass = document.getElementById('regPass').value;
             
-            const user = { name, phone, status: (phone === ADMIN_PHONE ? 'active' : 'pending') };
-            await db.ref('users/' + phone).update(user);
-            localStorage.setItem('activeUser', JSON.stringify(user));
-            location.reload();
+            if(!phone || !name || !pass) return alert("Пур кунед!");
+            
+            // Санҷиши рамз дар Firebase
+            db.ref('users/' + phone).once('value', async snap => {
+                const u = snap.val();
+                if(u && u.accessCode === pass) {
+                    const userData = { name, phone, status: 'active', isAdmin: false };
+                    await db.ref('users/' + phone).update(userData);
+                    localStorage.setItem('activeUser', JSON.stringify(userData));
+                    location.reload();
+                } else {
+                    alert("Рамзи дастрасӣ хато аст ё шумо ба қайд гирифта нашудаед!");
+                }
+            });
         },
 
         logout() { localStorage.removeItem('activeUser'); location.reload(); },
@@ -230,6 +279,11 @@
             document.getElementById('logoutLink').classList.remove('hidden');
             document.getElementById('loginLink').classList.add('hidden');
             
+            if(this.currentUser.isAdmin) {
+                document.getElementById('addBtn').classList.remove('hidden');
+                return;
+            }
+
             db.ref('users/' + this.currentUser.phone).on('value', snap => {
                 const u = snap.val();
                 if(u && u.status === 'active') {
@@ -258,11 +312,12 @@
                 name: document.getElementById('pName').value,
                 price: parseFloat(document.getElementById('pPrice').value) || 0,
                 city: document.getElementById('pCity').value,
+                adDate: document.getElementById('pAdDate').value,
                 desc: document.getElementById('pDesc').value,
                 img: imgBase64,
                 phone: this.currentUser.phone,
                 seller: this.currentUser.name,
-                date: new Date().toLocaleString()
+                created: new Date().toLocaleString()
             };
 
             await db.ref('products').push(p);
@@ -273,8 +328,7 @@
         loadProducts() {
             db.ref('products').on('value', snap => {
                 this.allProducts = [];
-                let mySum = 0;
-                let grand = 0;
+                let mySum = 0; let grand = 0;
                 
                 snap.forEach(child => {
                     const p = child.val();
@@ -284,9 +338,10 @@
                     if(this.currentUser && p.phone === this.currentUser.phone) mySum += p.price;
                 });
 
-                document.getElementById('userItemsCount').innerText = this.allProducts.filter(x => x.phone === this.currentUser?.phone).length;
-                document.getElementById('userTotalSum').innerText = mySum.toLocaleString() + " c.";
-                if(this.currentUser?.phone === ADMIN_PHONE) document.getElementById('adminGrandTotal').innerText = grand.toLocaleString() + " c.";
+                const myItems = this.allProducts.filter(x => x.phone === this.currentUser?.phone).length;
+                if(document.getElementById('userItemsCount')) document.getElementById('userItemsCount').innerText = myItems;
+                if(document.getElementById('userTotalSum')) document.getElementById('userTotalSum').innerText = mySum.toLocaleString() + " c.";
+                if(this.currentUser?.isAdmin) document.getElementById('adminGrandTotal').innerText = grand.toLocaleString() + " c.";
                 
                 this.renderProducts(this.allProducts);
             });
@@ -296,7 +351,7 @@
             const grid = document.getElementById('adsGrid');
             grid.innerHTML = "";
             list.slice().reverse().forEach(p => {
-                const isOwner = this.currentUser && (p.phone === this.currentUser.phone || this.currentUser.phone === ADMIN_PHONE);
+                const isOwner = this.currentUser && (p.phone === this.currentUser.phone || this.currentUser.isAdmin);
                 grid.innerHTML += `
                     <div class="card">
                         <span class="card-tag">${p.brand} ${p.model}</span>
@@ -306,6 +361,7 @@
                             ${isOwner ? `<button onclick="app.deleteP('${p.id}')" style="float:right; border:none; background:none; cursor:pointer">🗑️</button>` : ''}
                             <h3 style="margin:0">${p.name}</h3>
                             <div class="price">${p.price} c.</div>
+                            <div class="info-row"><span>📅 Санаи нашр:</span> <b>${p.adDate || '---'}</b></div>
                             <div class="info-row"><span>📍 Шаҳр:</span> <b>${p.city}</b></div>
                             <div class="info-row"><span>📅 Соли мошин:</span> <b>${p.year}</b></div>
                             <div class="info-row"><span>👤 Фурӯшанда:</span> <b>${p.seller}</b></div>
@@ -334,22 +390,39 @@
             document.getElementById('adminPanel').classList.remove('hidden');
             db.ref('users').on('value', snap => {
                 const list = document.getElementById('allUsersList');
-                list.innerHTML = "";
+                list.innerHTML = `
+                    <div style="background:white; padding:10px; margin-bottom:10px; border-radius:8px">
+                        <h4>➕ Иловаи корбари нав</h4>
+                        <input type="number" id="newUPhone" placeholder="Рақами телефон">
+                        <input type="text" id="newUName" placeholder="Номи корбар">
+                        <input type="text" id="newUPass" placeholder="Рамзи дастрасӣ (парол)">
+                        <button onclick="app.addNewUserByAdmin()" style="margin-top:5px; background:var(--success); color:white; border:none; padding:5px 10px; border-radius:4px">Илова кардан</button>
+                    </div>
+                `;
                 snap.forEach(child => {
                     const u = child.val();
+                    if(child.key === "ADMIN") return;
                     list.innerHTML += `
                         <div class="user-row">
-                            <span><b>${u.name}</b> (${u.phone}) - [${u.status}]</span>
+                            <span><b>${u.name || 'Нав'}</b> (${child.key}) - Рамз: <b style="color:red">${u.accessCode}</b></span>
                             <div>
-                                ${u.status === 'pending' ? `<button onclick="app.setStat('${u.phone}', 'active')">✅</button>` : ''}
-                                <button onclick="app.delUser('${u.phone}')">❌</button>
+                                <button onclick="app.delUser('${child.key}')">❌</button>
                             </div>
                         </div>`;
                 });
             });
         },
 
-        setStat(ph, st) { db.ref('users/' + ph).update({ status: st }); },
+        async addNewUserByAdmin() {
+            const ph = document.getElementById('newUPhone').value;
+            const nm = document.getElementById('newUName').value;
+            const ps = document.getElementById('newUPass').value;
+            if(ph && ps) {
+                await db.ref('users/' + ph).set({ name: nm, accessCode: ps, status: 'pending' });
+                alert("Илова шуд!");
+            }
+        },
+
         delUser(ph) { if(confirm("Нест карда шавад?")) db.ref('users/' + ph).remove(); },
         deleteP(id) { if(confirm("Эълон нест шавад?")) db.ref('products/' + id).remove(); }
     };
