@@ -13,6 +13,7 @@
         .nav-links { display: flex; gap: 20px; align-items: center; }
         .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.3s; }
         .nav-links a:hover { color: var(--accent); }
+        .btn-contact { background: var(--accent); color: white !important; padding: 5px 12px; border-radius: 5px; font-weight: bold; }
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
         .stats-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--accent); }
         .stat-item { flex: 1; text-align: center; border-right: 1px solid #eee; }
@@ -50,6 +51,7 @@
     <div style="font-size: 1.5rem; font-weight: bold; cursor:pointer" onclick="app.showPage('home')">Auto<span style="color:var(--accent)">Market</span></div>
     <div class="nav-links">
         <a onclick="app.showPage('home')">🏠 Асосӣ</a>
+        <a href="tel:933099029" class="btn-contact">📞 Алоқа бо Админ</a>
         <a onclick="app.showPage('add')" id="addBtn" class="hidden">➕ Эълон</a>
         <a onclick="app.showPage('login')" id="loginLink">🔑 Воридшавӣ</a>
         <span id="userInfo" style="font-size: 0.85rem; color: #bdc3c7; margin-left: 10px;"></span>
@@ -97,13 +99,13 @@
 
     <div id="loginPage" class="hidden">
         <div class="modal">
-            <h2 id="loginTitle">Воридшавӣ</h2>
+            <h2 id="loginTitle">Воридшавӣ / Қайд</h2>
             <div id="userLoginFields">
                 <input type="text" id="regName" placeholder="Номи пурра">
-                <input type="number" id="regPhone" placeholder="Рақами телефон (933XXXXXX)">
-                <input type="password" id="regPass" placeholder="Рамзи дастрасӣ (Access Code)">
-                <p style="font-size: 0.75rem; color: #666;">* Агар рамз надоред, ба админ муроҷиат кунед.</p>
-                <button onclick="app.handleAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--success); color:white; border:none; border-radius:8px; cursor:pointer">Давом додан</button>
+                <input type="number" id="regPhone" placeholder="933XXXXXX">
+                <input type="password" id="regPass" placeholder="Рамзи шумо (барои воридшавии минбаъда)">
+                <p style="font-size: 0.75rem; color: #666;">* Агар бори аввал бошед, рамзро худатон эҷод кунед. Дафъаи дигар бо ҳамин рамз ворид мешавед.</p>
+                <button onclick="app.handleAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--success); color:white; border:none; border-radius:8px; cursor:pointer">Ворид шудан</button>
             </div>
             <hr>
             <button onclick="app.toggleAdminLogin()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:0.8rem">🔓 Ман Админ ҳастам</button>
@@ -151,11 +153,10 @@
                 <option value="Душанбе">Душанбе</option>
                 <option value="Хуҷанд">Хуҷанд</option>
                 <option value="Бохтар">Бохтар</option>
-                <option value="Кӯлоб">Кӯлоб</option>
+                <option value="Кӯлоб">Айнӣ</option>
             </select>
             <label>Санаи нашр</label>
             <input type="date" id="pAdDate">
-            
             <label>Маълумот</label>
             <textarea id="pDesc" placeholder="Ҳолати запчаст..."></textarea>
             <label>Сурат</label>
@@ -166,7 +167,6 @@
 </div>
 
 <script>
-    // Танзимоти махсуси Админ
     const ADMIN_CRED = { user: "admin", pass: "25092003" };
 
     const firebaseConfig = {
@@ -237,7 +237,7 @@
             document.getElementById('userLoginFields').classList.toggle('hidden');
             document.getElementById('adminLoginFields').classList.toggle('hidden');
             document.getElementById('loginTitle').innerText = 
-                document.getElementById('adminLoginFields').classList.contains('hidden') ? "Воридшавӣ" : "Вуруди Админ";
+                document.getElementById('adminLoginFields').classList.contains('hidden') ? "Воридшавӣ / Қайд" : "Вуруди Админ";
         },
 
         async handleAdminAuth() {
@@ -257,16 +257,24 @@
             
             if(!phone || !name || !pass) return alert("Пур кунед!");
             
-            // Санҷиши рамз дар Firebase
             db.ref('users/' + phone).once('value', async snap => {
                 const u = snap.val();
-                if(u && u.accessCode === pass) {
-                    const userData = { name, phone, status: 'active', isAdmin: false };
-                    await db.ref('users/' + phone).update(userData);
-                    localStorage.setItem('activeUser', JSON.stringify(userData));
-                    location.reload();
+                if(u) {
+                    // Агар корбар вуҷуд дошта бошад, рамзро месанҷем
+                    if(u.accessCode === pass) {
+                        const userData = { name: u.name, phone, status: 'active', isAdmin: false };
+                        localStorage.setItem('activeUser', JSON.stringify(userData));
+                        location.reload();
+                    } else {
+                        alert("Рамз хато аст!");
+                    }
                 } else {
-                    alert("Рамзи дастрасӣ хато аст ё шумо ба қайд гирифта нашудаед!");
+                    // Агар корбар нав бошад, қайд мекунем
+                    const userData = { name, phone, accessCode: pass, status: 'active' };
+                    await db.ref('users/' + phone).set(userData);
+                    localStorage.setItem('activeUser', JSON.stringify({ name, phone, status: 'active', isAdmin: false }));
+                    alert("Шумо бо муваффақият қайд шудед!");
+                    location.reload();
                 }
             });
         },
@@ -329,7 +337,6 @@
             db.ref('products').on('value', snap => {
                 this.allProducts = [];
                 let mySum = 0; let grand = 0;
-                
                 snap.forEach(child => {
                     const p = child.val();
                     p.id = child.key;
@@ -337,12 +344,9 @@
                     grand += p.price;
                     if(this.currentUser && p.phone === this.currentUser.phone) mySum += p.price;
                 });
-
-                const myItems = this.allProducts.filter(x => x.phone === this.currentUser?.phone).length;
-                if(document.getElementById('userItemsCount')) document.getElementById('userItemsCount').innerText = myItems;
+                if(document.getElementById('userItemsCount')) document.getElementById('userItemsCount').innerText = this.allProducts.filter(x => x.phone === this.currentUser?.phone).length;
                 if(document.getElementById('userTotalSum')) document.getElementById('userTotalSum').innerText = mySum.toLocaleString() + " c.";
                 if(this.currentUser?.isAdmin) document.getElementById('adminGrandTotal').innerText = grand.toLocaleString() + " c.";
-                
                 this.renderProducts(this.allProducts);
             });
         },
@@ -390,37 +394,17 @@
             document.getElementById('adminPanel').classList.remove('hidden');
             db.ref('users').on('value', snap => {
                 const list = document.getElementById('allUsersList');
-                list.innerHTML = `
-                    <div style="background:white; padding:10px; margin-bottom:10px; border-radius:8px">
-                        <h4>➕ Иловаи корбари нав</h4>
-                        <input type="number" id="newUPhone" placeholder="Рақами телефон">
-                        <input type="text" id="newUName" placeholder="Номи корбар">
-                        <input type="text" id="newUPass" placeholder="Рамзи дастрасӣ (парол)">
-                        <button onclick="app.addNewUserByAdmin()" style="margin-top:5px; background:var(--success); color:white; border:none; padding:5px 10px; border-radius:4px">Илова кардан</button>
-                    </div>
-                `;
+                list.innerHTML = "<h4>Рӯйхати корбарони база</h4>";
                 snap.forEach(child => {
                     const u = child.val();
                     if(child.key === "ADMIN") return;
                     list.innerHTML += `
                         <div class="user-row">
-                            <span><b>${u.name || 'Нав'}</b> (${child.key}) - Рамз: <b style="color:red">${u.accessCode}</b></span>
-                            <div>
-                                <button onclick="app.delUser('${child.key}')">❌</button>
-                            </div>
+                            <span><b>${u.name}</b> (${child.key}) - Рамз: <b style="color:red">${u.accessCode}</b></span>
+                            <div><button onclick="app.delUser('${child.key}')">❌</button></div>
                         </div>`;
                 });
             });
-        },
-
-        async addNewUserByAdmin() {
-            const ph = document.getElementById('newUPhone').value;
-            const nm = document.getElementById('newUName').value;
-            const ps = document.getElementById('newUPass').value;
-            if(ph && ps) {
-                await db.ref('users/' + ph).set({ name: nm, accessCode: ps, status: 'pending' });
-                alert("Илова шуд!");
-            }
         },
 
         delUser(ph) { if(confirm("Нест карда шавад?")) db.ref('users/' + ph).remove(); },
