@@ -9,81 +9,50 @@
     <style>
         :root { --primary: #1a252f; --accent: #f39c12; --success: #27ae60; --danger: #e74c3c; --light: #ecf0f1; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f8f9fa; color: #333; }
-        
-        nav { background: var(--primary); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; 
-
-align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
+        nav { background: var(--primary); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
         .nav-links { display: flex; gap: 20px; align-items: center; }
         .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.3s; }
         .nav-links a:hover { color: var(--accent); }
-
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        
-        .stats-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 20px; 
-
-box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stats-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--accent); }
         .stat-item { flex: 1; text-align: center; border-right: 1px solid #eee; }
         .stat-item:last-child { border: none; }
         .stat-value { display: block; font-size: 1.2rem; font-weight: bold; color: var(--success); }
         .stat-label { font-size: 0.8rem; color: #7f8c8d; }
-
-        .search-box { margin-bottom: 25px; display: flex; gap: 10px; }
+        .search-box { margin-bottom: 25px; display: flex; gap: 10px; flex-wrap: wrap; }
         .search-box input, .search-box select { padding: 12px; border-radius: 8px; border: 1px solid #ddd; outline: none; }
-        .search-box input { flex: 3; }
-        .search-box select { flex: 1; }
-
+        .search-box input { flex: 3; min-width: 200px; }
+        .search-box select { flex: 1; min-width: 120px; }
         .ads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08); 
-
-transition: transform 0.3s; position: relative; border: 1px solid #eee; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08); transition: transform 0.3s; position: relative; border: 1px solid #eee; }
         .card:hover { transform: translateY(-5px); }
         .card img { width: 100%; height: 180px; object-fit: cover; }
         .card-body { padding: 15px; }
-        .card-tag { background: var(--primary); color: white; padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; 
-
-position: absolute; top: 10px; left: 10px; }
-        .type-tag { background: var(--accent); color: white; padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; 
-
-position: absolute; top: 10px; right: 10px; }
-        
+        .card-tag { background: var(--primary); color: white; padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; position: absolute; top: 10px; left: 10px; z-index: 1; }
+        .type-tag { background: var(--accent); color: white; padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; position: absolute; top: 10px; right: 10px; z-index: 1; }
         .price { font-size: 1.3rem; color: var(--success); font-weight: bold; margin: 5px 0; }
         .info-row { font-size: 0.85rem; margin-bottom: 4px; display: flex; justify-content: space-between; }
-        
         .btn-group { display: flex; gap: 8px; margin-top: 10px; }
-        .btn-wa { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 8px; flex: 1; 
-
-text-align: center; font-weight: bold; font-size: 0.9rem; }
-        .btn-call { background: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 8px; flex: 1; 
-
-text-align: center; font-weight: bold; font-size: 0.9rem; }
-        
-        .admin-panel { background: #e3f2fd; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid 
-
-#2196f3; }
-        .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; 
-
-background: white; margin-bottom: 5px; border-radius: 5px; }
-        
+        .btn-wa { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 8px; flex: 1; text-align: center; font-weight: bold; font-size: 0.9rem; }
+        .btn-call { background: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 8px; flex: 1; text-align: center; font-weight: bold; font-size: 0.9rem; }
+        .admin-panel { background: #e3f2fd; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #2196f3; }
+        .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; background: white; margin-bottom: 5px; border-radius: 5px; }
         .hidden { display: none !important; }
-        .modal { background: white; padding: 25px; border-radius: 15px; max-width: 500px; margin: 20px auto; box-shadow: 0 
-
-10px 30px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-
-
-sizing: border-box; }
+        .modal { background: white; padding: 25px; border-radius: 15px; max-width: 500px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        textarea { height: 80px; resize: none; font-family: inherit; }
+        label { font-size: 0.85rem; font-weight: bold; color: #555; margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
 
 <nav>
-    <div style="font-size: 1.5rem; font-weight: bold; cursor:pointer" onclick="app.showPage('home')">Auto<span 
-
-style="color:var(--accent)">Market</span></div>
+    <div style="font-size: 1.5rem; font-weight: bold; cursor:pointer" onclick="app.showPage('home')">Auto<span style="color:var(--accent)">Market</span></div>
     <div class="nav-links">
         <a onclick="app.showPage('home')">🏠 Асосӣ</a>
         <a onclick="app.showPage('add')" id="addBtn" class="hidden">➕ Эълон</a>
         <a onclick="app.showPage('login')" id="loginLink">🔑 Воридшавӣ</a>
-        <span id="userInfo" style="font-size: 0.85rem; color: #bdc3c7;"></span>
+        <span id="userInfo" style="font-size: 0.85rem; color: #bdc3c7; margin-left: 10px;"></span>
         <a onclick="app.logout()" id="logoutLink" class="hidden">🚪 Баромад</a>
     </div>
 </nav>
@@ -103,7 +72,7 @@ style="color:var(--accent)">Market</span></div>
     <div id="searchArea" class="search-box">
         <input type="text" id="searchInput" placeholder="🔍 Номи запчаст ё мошин..." onkeyup="app.filterProducts()">
         <select id="typeFilter" onchange="app.filterProducts()">
-            <option value="">намуд</option>
+            <option value="">Намуд</option>
             <option value="Ходовой">Ходовой</option>
             <option value="Электронӣ">Электронӣ</option>
             <option value="Мотор">Мотор</option>
@@ -113,10 +82,10 @@ style="color:var(--accent)">Market</span></div>
 
     <div id="adminPanel" class="admin-panel hidden">
         <div style="display:flex; justify-content:space-between; align-items:center">
-            <h3 style="margin-top:0">👥 Идоракунии Истифодабарандагон (Админ)</h3>
-            <div style="text-align:right">
-                <span style="color:#2196f3; font-weight:bold">Маблағи умумии база: </span>
-                <span id="adminGrandTotal" style="color:var(--success); font-size:1.2rem; font-weight:bold">0 c.</span>
+            <h3>👥 Админ Панел</h3>
+            <div>
+                <span>База: </span>
+                <span id="adminGrandTotal" style="color:var(--success); font-weight:bold">0 c.</span>
             </div>
         </div>
         <div id="allUsersList"></div>
@@ -130,93 +99,71 @@ style="color:var(--accent)">Market</span></div>
         <div class="modal">
             <h2>Воридшавӣ</h2>
             <input type="text" id="regName" placeholder="Номи пурра">
-            <input type="number" id="regPhone" placeholder="рақами телефон">
-            <button onclick="app.handleAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--success); 
-
-color:white; border:none; border-radius:8px; cursor:pointer">Давом додан</button>
+            <input type="number" id="regPhone" placeholder="933XXXXXX">
+            <button onclick="app.handleAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--success); color:white; border:none; border-radius:8px; cursor:pointer">Давом додан</button>
         </div>
     </div>
 
     <div id="addPage" class="hidden">
         <div class="modal">
             <h2>📦 Эълони нав</h2>
-            
-            <label>Тамғаи мошин (Марка)</label>
+            <label>Марка</label>
             <select id="pCarBrand" onchange="app.updateModels()">
-                <option value="">-- Интихоб кунед --</option>
+                <option value="">-- Интихоб --</option>
                 <option value="Opel">Opel</option>
                 <option value="Toyota">Toyota</option>
                 <option value="Mercedes-Benz">Mercedes-Benz</option>
                 <option value="BMW">BMW</option>
                 <option value="Hyundai">Hyundai</option>
                 <option value="Kia">Kia</option>
-                <option value="SsangYong">SsangYong</option>
                 <option value="LADA">LADA</option>
-                <option value="Volkswagen">Volkswagen</option>
-                <option value="Honda">Honda</option>
                 <option value="Lexus">Lexus</option>
-                <option value="Nissan">Nissan</option>
-                <option value="Mitsubishi">Mitsubishi</option>
-                <option value="Ford">Ford</option>
-                <option value="Chevrolet">Chevrolet</option>
-                <option value="Audi">Audi</option>
-                <option value="Mazda">Mazda</option>
-                <option value="Land Rover">Land Rover</option>
             </select>
-
-            <label>Модели мошин</label>
-            <select id="pCarModel">
-                <option value="">-- Аввал маркаро интихоб кунед --</option>
-            </select>
-            
+            <label>Модел</label>
+            <select id="pCarModel"><option value="">-- Аввал марка --</option></select>
             <label>Соли мошин</label>
             <select id="pCarYear"></select>
-
-            <label>Типи маҳсулот</label>
+            <label>Навъи запчаст</label>
             <select id="pType">
                 <option value="Ходовой">Ходовой</option>
                 <option value="Электронӣ">Электронӣ</option>
                 <option value="Мотор">Мотор</option>
                 <option value="Кузов">Кузов</option>
-                <option value="Дигар">Дигар</option>
             </select>
-
             <label>Номи запчаст</label>
             <input type="text" id="pName" placeholder="Масалан: Радиатор">
-
             <label>Нарх (сомонӣ)</label>
             <input type="number" id="pPrice">
-
-            <label>Миқдор</label>
-            <input type="number" id="pQty" value="1">
-
-            <label>Доставка (аз - то)</label>
-            <input type="text" id="pDelivery" placeholder="Масалан: Хуҷанд - Душанбе">
-
-            <label>Мӯҳлати кафолат (маълумот \рӯз)</label>
-            <input type="number" id="pWarranty" placeholder="Масалан: 30">
-
+            <label>Шаҳр</label>
+            <select id="pCity">
+                <option value="Душанбе">Душанбе</option>
+                <option value="Хуҷанд">Хуҷанд</option>
+                <option value="Бохтар">Бохтар</option>
+                <option value="Кӯлоб">Кӯлоб</option>
+            </select>
+            <label>Маълумот</label>
+            <textarea id="pDesc" placeholder="Ҳолати запчаст..."></textarea>
             <label>Сурат</label>
             <input type="file" id="pImg" accept="image/*">
-
-            <button onclick="app.addProduct()" style="width:100%; padding:12px; margin-top:20px; background:var(--accent); 
-
-color:white; border:none; border-radius:8px; cursor:pointer">Нашр кардан</button>
+            <button onclick="app.addProduct()" style="width:100%; padding:12px; margin-top:20px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer">Нашр кардан</button>
         </div>
     </div>
 </div>
 
 <script>
-    const ADMIN_PHONE = "25092003933099029"; 
-    const firebaseConfig = {
-        apiKey: "AIzaSy...", 
-        authDomain: "automarkettj.firebaseapp.com",
-        databaseURL: "https://automarkettj-default-rtdb.firebaseio.com/",
-        projectId: "automarkettj",
-        storageBucket: "automarkettj.appspot.com",
-        messagingSenderId: "...",
-        appId: "..."
-    };
+    const ADMIN_PHONE = "933099029."; // Рақами админро ин ҷо ислоҳ кунед
+    
+    // ДИҚҚАТ: Ин ҷо бояд маълумоти Firebase-и худро гузоред
+   const firebaseConfig = {
+  apiKey: "AIzaSyCOYjoU34k2CDWVZd7D4XvhXAwgFK_LxlE",
+  authDomain: "automarkettj.firebaseapp.com",
+  databaseURL: "https://automarkettj-default-rtdb.firebaseio.com",
+  projectId: "automarkettj",
+  storageBucket: "automarkettj.firebasestorage.app",
+  messagingSenderId: "614498527268",
+  appId: "1:614498527268:web:ff06a8f246df42ac1ad0b1",
+  measurementId: "G-1PXXWX9TT2"
+};
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -224,63 +171,42 @@ color:white; border:none; border-radius:8px; cursor:pointer">Нашр карда
     const app = {
         currentUser: JSON.parse(localStorage.getItem('activeUser')),
         allProducts: [],
-        
         carDatabase: {
-            "Opel": ["Astra G", "Astra H", "Vectra B", "Vectra C", "Zafira A", "Zafira B", "Corsa"],
-            "Toyota": ["Camry 50", "Camry 55", "Camry 70", "Corolla", "Rav4", "Avalon", "Prado"],
-            "Mercedes-Benz": ["W210 (Chashmaka)", "W211", "W212", "W202", "W203", "W204", "Sprinter"],
-            "BMW": ["E34", "E39", "E60", "F10", "X5 E53", "X5 E70", "X6"],
-            "Hyundai": ["Elantra", "Sonata", "Solaris", "Accent", "Tucson", "Santa Fe"],
-            "Kia": ["Optima", "K5", "Rio", "Sportage", "Sorento"],
-            "SsangYong": ["Musso", "Korando", "Rexton", "Kyron"],
-            "LADA": ["Priora", "Vesta", "Granta", "Niva", "2107", "2114"],
-            "Volkswagen": ["Golf", "Jetta", "Passat", "Polo", "Touareg", "Tiguan"],
-            "Honda": ["Civic", "Accord", "CR-V", "Fit", "Insight", "HR-V"],
-            "Lexus": ["RX350", "GX470", "LX570", "IS250", "ES350", "LS460"],
-            "Nissan": ["Altima", "Sentra", "Patrol", "Qashqai", "X-Trail", "Juke"],
-            "Mitsubishi": ["Pajero", "Lancer", "Outlander", "ASX", "Montero Sport", "Galant"],
-            "Ford": ["Focus", "Fusion", "Explorer", "Mustang", "F-150", "Escape"],
-            "Chevrolet": ["Aveo", "Lacetti", "Cobalt", "Captiva", "Malibu", "Cruze"],
-            "Audi": ["A4", "A6", "A8", "Q5", "Q7", "100"],          
-            "Mazda": ["Mazda 3", "Mazda 6", "CX-5", "CX-9", "RX-8", "MPV"], 
-            "Land Rover": ["Range Rover", "Range Rover Sport", "Discovery", "Freelander", "Evoque", "Defender"]
+            "Opel": ["Astra G", "Astra H", "Vectra B", "Zafira"],
+            "Toyota": ["Camry 50", "Camry 70", "Corolla", "Prado"],
+            "Mercedes-Benz": ["W210", "W211", "W212", "Sprinter"],
+            "BMW": ["E39", "E60", "F10", "X5"],
+            "Hyundai": ["Elantra", "Sonata", "Solaris"],
+            "Kia": ["Optima", "K5", "Rio"],
+            "LADA": ["Priora", "Vesta", "2107"],
+            "Lexus": ["RX350", "GX470", "LX570"]
         },
 
         init() {
+            this.fillYears();
             this.checkUserStatus();
             this.loadProducts();
-            this.fillYears();
-            if(this.currentUser) {
-                document.getElementById('statsSection').classList.remove('hidden');
-                if(this.currentUser.phone === ADMIN_PHONE) this.loadAdminUsers();
-            }
+            if(this.currentUser?.phone === ADMIN_PHONE) this.loadAdminUsers();
         },
 
-        showPage(pageId) {
+        showPage(id) {
             ['home', 'login', 'add'].forEach(p => document.getElementById(p + 'Page').classList.add('hidden'));
-            document.getElementById(pageId + 'Page').classList.remove('hidden');
-            document.getElementById('searchArea').classList.toggle('hidden', pageId !== 'home');
+            document.getElementById(id + 'Page').classList.remove('hidden');
+            document.getElementById('searchArea').classList.toggle('hidden', id !== 'home');
         },
 
         fillYears() {
-            const yearSelect = document.getElementById('pCarYear');
-            const currentYear = new Date().getFullYear();
-            for (let i = currentYear; i >= 1990; i--) {
-                const opt = document.createElement('option');
-                opt.value = i; opt.innerText = i;
-                yearSelect.appendChild(opt);
-            }
+            const s = document.getElementById('pCarYear');
+            for(let i=2025; i>=1990; i--) s.innerHTML += `<option value="${i}">${i}</option>`;
         },
 
         updateModels() {
             const brand = document.getElementById('pCarBrand').value;
             const modelSelect = document.getElementById('pCarModel');
-            modelSelect.innerHTML = brand ? "" : '<option value="">-- Аввал маркаро интихоб кунед --</option>';
-            if (this.carDatabase[brand]) {
+            modelSelect.innerHTML = "";
+            if(this.carDatabase[brand]) {
                 this.carDatabase[brand].forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m; opt.innerText = m;
-                    modelSelect.appendChild(opt);
+                    modelSelect.innerHTML += `<option value="${m}">${m}</option>`;
                 });
             }
         },
@@ -288,87 +214,80 @@ color:white; border:none; border-radius:8px; cursor:pointer">Нашр карда
         async handleAuth() {
             const name = document.getElementById('regName').value;
             const phone = document.getElementById('regPhone').value;
-            if(!phone) return alert("Рақам лозим!");
-            const snap = await db.ref('users/' + phone).once('value');
-            const user = snap.val();
-            if (user) { this.login(user); } else {
-                const newUser = { name, phone, status: (phone === ADMIN_PHONE ? 'active' : 'pending') };
-                await db.ref('users/' + phone).set(newUser);
-                this.login(newUser);
-            }
+            if(!phone || !name) return alert("Пур кунед!");
+            
+            const user = { name, phone, status: (phone === ADMIN_PHONE ? 'active' : 'pending') };
+            await db.ref('users/' + phone).update(user);
+            localStorage.setItem('activeUser', JSON.stringify(user));
+            location.reload();
         },
 
-        login(user) { localStorage.setItem('activeUser', JSON.stringify(user)); location.reload(); },
         logout() { localStorage.removeItem('activeUser'); location.reload(); },
 
         checkUserStatus() {
             if(!this.currentUser) return;
-            document.getElementById('logoutLink').classList.remove('hidden');
             document.getElementById('userInfo').innerText = `👤 ${this.currentUser.name}`;
+            document.getElementById('logoutLink').classList.remove('hidden');
+            document.getElementById('loginLink').classList.add('hidden');
+            
             db.ref('users/' + this.currentUser.phone).on('value', snap => {
-                if(snap.val()?.status === 'active') document.getElementById('addBtn').classList.remove('hidden');
+                const u = snap.val();
+                if(u && u.status === 'active') {
+                    document.getElementById('addBtn').classList.remove('hidden');
+                    document.getElementById('statsSection').classList.remove('hidden');
+                }
             });
         },
 
         async addProduct() {
             const file = document.getElementById('pImg').files[0];
-            let imgData = "";
+            let imgBase64 = "";
             if(file) {
-                imgData = await new Promise(r => {
+                imgBase64 = await new Promise(r => {
                     const reader = new FileReader();
                     reader.onload = () => r(reader.result);
                     reader.readAsDataURL(file);
                 });
             }
 
-            const product = {
-                carBrand: document.getElementById('pCarBrand').value,
-                carModel: document.getElementById('pCarModel').value,
-                carYear: document.getElementById('pCarYear').value,
+            const p = {
+                brand: document.getElementById('pCarBrand').value,
+                model: document.getElementById('pCarModel').value,
+                year: document.getElementById('pCarYear').value,
                 type: document.getElementById('pType').value,
                 name: document.getElementById('pName').value,
-                price: parseFloat(document.getElementById('pPrice').value),
-                qty: parseInt(document.getElementById('pQty').value),
-                delivery: document.getElementById('pDelivery').value,
-                warranty: document.getElementById('pWarranty').value,
-                img: imgData,
-                sellerPhone: this.currentUser.phone,
-                sellerName: this.currentUser.name,
-                date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString().substring(0,5)
+                price: parseFloat(document.getElementById('pPrice').value) || 0,
+                city: document.getElementById('pCity').value,
+                desc: document.getElementById('pDesc').value,
+                img: imgBase64,
+                phone: this.currentUser.phone,
+                seller: this.currentUser.name,
+                date: new Date().toLocaleString()
             };
 
-            await db.ref('products').push(product);
+            await db.ref('products').push(p);
+            alert("Нашр шуд!");
             this.showPage('home');
         },
 
         loadProducts() {
             db.ref('products').on('value', snap => {
                 this.allProducts = [];
-                let myQty = 0;
                 let mySum = 0;
-                let grandTotal = 0;
-
+                let grand = 0;
+                
                 snap.forEach(child => {
                     const p = child.val();
                     p.id = child.key;
                     this.allProducts.push(p);
-                    
-                    const itemTotal = (p.price * p.qty);
-                    grandTotal += itemTotal;
-
-                    if(this.currentUser && p.sellerPhone === this.currentUser.phone) {
-                        myQty += p.qty;
-                        mySum += itemTotal;
-                    }
+                    grand += p.price;
+                    if(this.currentUser && p.phone === this.currentUser.phone) mySum += p.price;
                 });
 
-                if(this.currentUser) {
-                    document.getElementById('userItemsCount').innerText = myQty;
-                    document.getElementById('userTotalSum').innerText = mySum.toLocaleString() + " c.";
-                    if(this.currentUser.phone === ADMIN_PHONE) {
-                        document.getElementById('adminGrandTotal').innerText = grandTotal.toLocaleString() + " c.";
-                    }
-                }
+                document.getElementById('userItemsCount').innerText = this.allProducts.filter(x => x.phone === this.currentUser?.phone).length;
+                document.getElementById('userTotalSum').innerText = mySum.toLocaleString() + " c.";
+                if(this.currentUser?.phone === ADMIN_PHONE) document.getElementById('adminGrandTotal').innerText = grand.toLocaleString() + " c.";
+                
                 this.renderProducts(this.allProducts);
             });
         },
@@ -377,29 +296,23 @@ color:white; border:none; border-radius:8px; cursor:pointer">Нашр карда
             const grid = document.getElementById('adsGrid');
             grid.innerHTML = "";
             list.slice().reverse().forEach(p => {
-                const isOwner = this.currentUser && (this.currentUser.phone === p.sellerPhone || this.currentUser.phone === 
-
-ADMIN_PHONE);
+                const isOwner = this.currentUser && (p.phone === this.currentUser.phone || this.currentUser.phone === ADMIN_PHONE);
                 grid.innerHTML += `
                     <div class="card">
-                        <span class="card-tag">${p.carBrand} ${p.carModel} (${p.carYear})</span>
+                        <span class="card-tag">${p.brand} ${p.model}</span>
                         <span class="type-tag">${p.type}</span>
-                        <img src="${p.img || 'https://via.placeholder.com/300x180'}">
+                        <img src="${p.img || 'https://via.placeholder.com/300x180?text=No+Image'}">
                         <div class="card-body">
-                            ${isOwner ? `<button onclick="app.deleteP('${p.id}')" style="float:right; border:none; 
-
-background:none; cursor:pointer">🗑️</button>` : ''}
+                            ${isOwner ? `<button onclick="app.deleteP('${p.id}')" style="float:right; border:none; background:none; cursor:pointer">🗑️</button>` : ''}
                             <h3 style="margin:0">${p.name}</h3>
                             <div class="price">${p.price} c.</div>
-                            <div class="info-row"><span>📦 Миқдор:</span> <b>${p.qty} адад</b></div>
-                            <div class="info-row"><span>🚚 Доставка:</span> <b>${p.delivery}</b></div>
-                            <div class="info-row"><span>🛡️ Кафолат:</span> <b>${p.warranty} рӯз</b></div>
-                            <div class="info-row"><span>👤 Фурӯшанда:</span> <b>${p.sellerName}</b></div>
-                            <div class="info-row" style="color:#999; font-size:0.7rem">📅 Сана: ${p.date}</div>
-                            
+                            <div class="info-row"><span>📍 Шаҳр:</span> <b>${p.city}</b></div>
+                            <div class="info-row"><span>📅 Соли мошин:</span> <b>${p.year}</b></div>
+                            <div class="info-row"><span>👤 Фурӯшанда:</span> <b>${p.seller}</b></div>
+                            <p style="font-size:0.8rem; color:#666; background:#f9f9f9; padding:5px; border-radius:5px">${p.desc || 'Маълумот нест'}</p>
                             <div class="btn-group">
-                                <a href="tel:+992${p.sellerPhone}" class="btn-call">📞 Занг задан</a>
-                                <a href="https://wa.me/992${p.sellerPhone}" class="btn-wa">💬 WhatsApp</a>
+                                <a href="tel:+992${p.phone}" class="btn-call">📞 Занг</a>
+                                <a href="https://wa.me/992${p.phone}" class="btn-wa">💬 WA</a>
                             </div>
                         </div>
                     </div>`;
@@ -410,8 +323,7 @@ background:none; cursor:pointer">🗑️</button>` : ''}
             const term = document.getElementById('searchInput').value.toLowerCase();
             const type = document.getElementById('typeFilter').value;
             const filtered = this.allProducts.filter(p => {
-                const searchStr = (p.name + p.carBrand + p.carModel).toLowerCase();
-                const matchSearch = searchStr.includes(term);
+                const matchSearch = (p.name + p.brand + p.model).toLowerCase().includes(term);
                 const matchType = type === "" || p.type === type;
                 return matchSearch && matchType;
             });
@@ -420,53 +332,29 @@ background:none; cursor:pointer">🗑️</button>` : ''}
 
         loadAdminUsers() {
             document.getElementById('adminPanel').classList.remove('hidden');
-            // Мо ҳам истифодабарандагон ва ҳам маҳсулотро пайваста назорат мекунем
-            db.ref('users').on('value', userSnap => {
-                db.ref('products').on('value', prodSnap => {
-                    const list = document.getElementById('allUsersList');
-                    list.innerHTML = "";
-                    
-                    const products = [];
-                    prodSnap.forEach(p => { products.push(p.val()); });
-
-                    userSnap.forEach(c => {
-                        const u = c.val();
-                        
-                        // Ҳисоб кардани маблағи умумии маҳсулоти ҳамин корбар
-                        const userTotal = products
-                            .filter(p => p.sellerPhone === u.phone)
-                            .reduce((sum, p) => sum + (p.price * p.qty), 0);
-
-                        list.innerHTML += `
-                            <div class="user-row">
-                                <span>
-                                    <b>${u.name}</b> (${u.phone}) - [${u.status}] 
-                                    <br>
-                                    <small style="color:var(--success); font-weight:bold">💰 Маблағи молҳо: 
-
-${userTotal.toLocaleString()} c.</small>
-                                </span>
-                                <div>
-                                    ${u.status === 'pending' ? `<button onclick="app.updateUser('${u.phone}', 'active')" 
-
-style="color:green; cursor:pointer; border:none; background:none; font-size:1.2rem">✅</button>` : ''}
-                                    <button onclick="app.deleteUser('${u.phone}')" style="color:red; cursor:pointer; 
-
-border:none; background:none; font-size:1.2rem">❌</button>
-                                </div>
-                            </div>`;
-                    });
+            db.ref('users').on('value', snap => {
+                const list = document.getElementById('allUsersList');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const u = child.val();
+                    list.innerHTML += `
+                        <div class="user-row">
+                            <span><b>${u.name}</b> (${u.phone}) - [${u.status}]</span>
+                            <div>
+                                ${u.status === 'pending' ? `<button onclick="app.setStat('${u.phone}', 'active')">✅</button>` : ''}
+                                <button onclick="app.delUser('${u.phone}')">❌</button>
+                            </div>
+                        </div>`;
                 });
             });
         },
 
-        updateUser(phone, status) { db.ref('users/' + phone).update({ status }); },
-        deleteUser(phone) { if(confirm("Истифодабаранда нест карда шавад?")) db.ref('users/' + phone).remove(); },
-        deleteP(id) { if(confirm("Эълон нест карда шавад?")) db.ref('products/' + id).remove(); }
+        setStat(ph, st) { db.ref('users/' + ph).update({ status: st }); },
+        delUser(ph) { if(confirm("Нест карда шавад?")) db.ref('users/' + ph).remove(); },
+        deleteP(id) { if(confirm("Эълон нест шавад?")) db.ref('products/' + id).remove(); }
     };
 
     app.init();
 </script>
 </body>
 </html>
-
