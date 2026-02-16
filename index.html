@@ -1,152 +1,5 @@
-<!DOCTYPE html>
-<html lang="tg">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Қисмҳои Эҳтиётӣ (Запчаст) - Admin Panel</title>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-    
-    <style>
-        :root { --primary: #2c3e50; --accent: #e67e22; --success: #27ae60; --wa: #25d366; --danger: #e74c3c; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--light); }
-        
-        /* Navbar & Burger Menu */
-        nav { background: var(--primary); color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; height: 70px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .logo { font-size: 1.4rem; font-weight: bold; cursor: pointer; }
-        .logo span { color: var(--accent); }
-        
-        .nav-links { display: flex; gap: 15px; align-items: center; }
-        .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.3s; }
-        .nav-links a:hover { color: var(--accent); }
-
-        .burger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
-        .burger div { width: 25px; height: 3px; background: white; border-radius: 5px; }
-
-        /* General UI */
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        
-        .search-area { background: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-        
-        .ads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); position: relative; transition: 0.3s; border: 1px solid #eee; }
-        .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
-        .card-body { padding: 15px; }
-        .price-tag { color: var(--success); font-size: 1.4rem; font-weight: bold; margin: 10px 0; display: block; }
-        
-        .btn-action { width: 100%; padding: 12px; border-radius: 8px; margin-top: 8px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; display: block; text-align: center; box-sizing: border-box; }
-        
-        .modal { background: white; padding: 30px; border-radius: 15px; width: 100%; max-width: 550px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .hidden { display: none !important; }
-
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links { display: none; position: absolute; top: 70px; left: 0; width: 100%; background: var(--primary); flex-direction: column; padding: 20px 0; border-top: 1px solid #444; }
-            .nav-links.active { display: flex; }
-            .burger { display: flex; }
-        }
-    </style>
-</head>
-<body>
-
-<nav>
-    <div class="logo" onclick="app.showPage('home')">Қисмҳо<span>TJ</span></div>
-    <div class="burger" onclick="document.querySelector('.nav-links').classList.toggle('active')">
-        <div></div><div></div><div></div>
-    </div>
-    <div class="nav-links">
-        <a onclick="app.showPage('home')">🏠 Асосӣ</a>
-        <a onclick="app.showPage('add')" id="addBtn" class="hidden">➕ Эълони нав</a>
-        <a onclick="app.showPage('admin')" id="adminBtn" class="hidden" style="color:var(--accent)">⚙️ Админ</a>
-        <a onclick="app.showPage('login')" id="loginLink">🔑 Воридшавӣ</a>
-        <a onclick="app.logout()" id="logoutLink" class="hidden">🚪 Баромад</a>
-    </div>
-</nav>
-
-<div class="container">
-    <div id="homePage">
-        <div class="search-area">
-            <input type="text" id="searchName" placeholder="🔍 Номи қисм..." oninput="app.loadAds()">
-            <select id="searchBrand" onchange="app.loadAds()">
-                <option value="">Ҳамаи маркаҳо</option>
-            </select>
-            <select id="searchType" onchange="app.loadAds()">
-                <option value="">Ҳамаи намудҳо</option>
-                <option>Хадавой</option>
-                <option>Электронӣ</option>
-                <option>Кузов</option>
-                <option>Матор/Коробка</option>
-                <option>Дигар</option>
-            </select>
-        </div>
-        <div id="adsGrid" class="ads-grid"></div>
-    </div>
-
-    <div id="adminPage" class="hidden">
-        <h2>🛠️ Идоракунии Система</h2>
-        <div class="stats-bar">
-            <div class="stat-card">👤 Истифодабарандагон: <b id="countUsers">0</b></div>
-            <div class="stat-card">📦 Ҳамаи маҳсулот: <b id="totalAdsCount">0</b></div>
-            <div class="stat-card" style="border: 2px solid var(--success);">💰 Нархи умумӣ: <b id="adminTotalValue">0</b> с.</div>
-            <div class="stat-card">🟢 Онлайн: <b id="adminOnlineCount">0</b></div>
-        </div>
-        
-        <div class="modal" style="max-width: 100%; margin-top: 20px;">
-            <h3>Рӯйхати корбарон</h3>
-            <input type="text" id="userSearch" placeholder="🔍 Ҷустуҷӯи корбар (ном ё телефон)..." oninput="app.loadUsers()" style="margin-bottom: 15px;">
-            <div id="adminUsersList"></div>
-        </div>
-    </div>
-
-    <div id="addPage" class="hidden">
-        <div class="modal">
-            <h2>📦 Эълони қисми нав</h2>
-            <label>Маркаи мошин</label>
-            <select id="pCarBrand" onchange="app.updateModels()"></select>
-            <label>Модели мошин</label>
-            <select id="pCarModel"></select>
-            <label>Намуди қисм</label>
-            <select id="pPartType">
-                <option>Хадавой</option>
-                <option>Электронӣ</option>
-                <option>Кузов</option>
-                <option>Матор/Коробка</option>
-                <option>Дигар</option>
-            </select>
-            <label>Соли мошин</label>
-            <input type="number" id="pYear" placeholder="Масалан: 2010">
-            <label>Номи қисм ва маълумот</label>
-            <textarea id="pDesc" placeholder="Масалан: Фараҳои Toyota Camry 50, ҳолати нав..."></textarea>
-            <label>Нарх (сомонӣ)</label>
-            <input type="number" id="pPrice">
-            <label>Сурат</label>
-            <input type="file" id="pImg" accept="image/*">
-            <button onclick="app.getLocation()" id="locBtn" class="btn-action" style="background:#3498db; color:white;">📍 Мавқеъро муайян кун</button>
-            <input type="hidden" id="pCoords">
-            <button class="btn-action" style="background:var(--accent); color:white; margin-top:20px;" onclick="app.addProduct()">Нашр кардан</button>
-        </div>
-    </div>
-
-    <div id="loginPage" class="hidden">
-        <div class="modal">
-            <h2 id="authTitle">Воридшавӣ</h2>
-            <div id="regNameDiv" class="hidden"><label>Номи шумо</label><input type="text" id="regName"></div>
-            <label>Рақами телефон (бе +992)</label><input type="number" id="regPhone" placeholder="933000000">
-            <label>Рамз</label><input type="password" id="regPass">
-            <button onclick="app.handleAuth()" class="btn-action" style="background:var(--success); color:white;">Давом додан</button>
-            <p onclick="app.toggleAuthMode()" style="text-align:center; cursor:pointer; color:blue; margin-top:15px;">Қайдгирӣ</p>
-        </div>
-    </div>
-</div>
-
 <script>
-    // КОНФИГУРАТСИЯИ FIREBASE
+    // КОНФИГУРАТСИЯИ FIREBASE (Ҳамон тавре ки буд)
     const firebaseConfig = {
         apiKey: "AIzaSyCOYjoU34k2CDWVZd7D4XvhXAwgFK_LxlE",
         authDomain: "automarkettj.firebaseapp.com",
@@ -177,23 +30,29 @@
             this.fillBrands();
             auth.onAuthStateChanged(async user => {
                 if(user) {
-                    const snap = await db.ref('users/' + user.uid).once('value');
-                    const u = snap.val();
-                    this.isAdmin = u && u.role === 'admin';
-                    
-                    // Presence
+                    // Санҷиши админ дар ҳолати Realtime
+                    db.ref('users/' + user.uid).on('value', snap => {
+                        const u = snap.val();
+                        this.isAdmin = u && u.role === 'admin';
+                        
+                        if(this.isAdmin) {
+                            document.getElementById('adminBtn').classList.remove('hidden');
+                            this.loadUsers(); // Барои админ рӯйхати корбаронро меорад
+                        }
+                    });
+
+                    // Presence (Статус онлайн)
                     const statusRef = db.ref('users/' + user.uid + '/online');
                     db.ref('.info/connected').on('value', s => {
-                        if(s.val()) { statusRef.onDisconnect().set(false); statusRef.set(true); }
+                        if(s.val()) { 
+                            statusRef.onDisconnect().set(false); 
+                            statusRef.set(true); 
+                        }
                     });
 
                     document.getElementById('addBtn').classList.remove('hidden');
                     document.getElementById('logoutLink').classList.remove('hidden');
                     document.getElementById('loginLink').classList.add('hidden');
-                    if(this.isAdmin) {
-                        document.getElementById('adminBtn').classList.remove('hidden');
-                        this.loadUsers();
-                    }
                 }
             });
             this.loadAds();
@@ -214,14 +73,19 @@
             const b = document.getElementById('pCarBrand').value;
             const m = document.getElementById('pCarModel');
             m.innerHTML = "";
-            this.carDatabase[b].forEach(i => m.innerHTML += `<option value="${i}">${i}</option>`);
+            if(this.carDatabase[b]) {
+                this.carDatabase[b].forEach(i => m.innerHTML += `<option value="${i}">${i}</option>`);
+            }
         },
 
         trackGlobal() {
+            // Шумораи онлайнҳо барои панели админ
             db.ref('users').on('value', snap => {
                 let online = 0;
-                snap.forEach(c => { if(c.val().online) online++ });
-                if(document.getElementById('adminOnlineCount')) document.getElementById('adminOnlineCount').innerText = online;
+                snap.forEach(c => { if(c.val().online === true) online++ });
+                if(document.getElementById('adminOnlineCount')) {
+                    document.getElementById('adminOnlineCount').innerText = online;
+                }
             });
         },
 
@@ -233,7 +97,8 @@
             db.ref('products').on('value', snap => {
                 const grid = document.getElementById('adsGrid');
                 grid.innerHTML = "";
-                let totalSum = 0; let count = 0;
+                let totalSum = 0; 
+                let count = 0;
 
                 snap.forEach(child => {
                     const p = child.val();
@@ -242,7 +107,7 @@
                        (!sType || p.type === sType)) {
                         
                         count++;
-                        totalSum += Number(p.price);
+                        totalSum += Number(p.price || 0);
                         const isOwner = auth.currentUser && (auth.currentUser.uid === p.uid || this.isAdmin);
                         
                         grid.innerHTML += `
@@ -250,9 +115,9 @@
                                 ${isOwner ? `<button onclick="app.deleteAd('${child.key}')" style="position:absolute;right:10px;top:10px;background:red;color:white;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;z-index:10">🗑️</button>` : ''}
                                 <img src="${p.img || 'https://via.placeholder.com/300x200?text=No+Photo'}">
                                 <div class="card-body">
-                                    <small style="color:var(--accent)">${p.type} | ${p.brand} ${p.model} (${p.year})</small>
+                                    <small style="color:var(--accent)">${p.type || ''} | ${p.brand} ${p.model} (${p.year || ''})</small>
                                     <h3 style="margin:5px 0">${p.brand} ${p.model}</h3>
-                                    <p style="font-size:0.9rem; color:#666">${p.desc}</p>
+                                    <p style="font-size:0.9rem; color:#666">${p.desc || ''}</p>
                                     <b class="price-tag">${p.price} сомонӣ</b>
                                     <a href="tel:+992${p.phone}" class="btn-action" style="background:var(--primary); color:white;">📞 Занг задан</a>
                                     ${p.coords ? `<a href="https://www.google.com/maps?q=${p.coords}" target="_blank" class="btn-action" style="background:#3498db; color:white;">📍 Мавқеъ дар харита</a>` : ''}
@@ -260,44 +125,56 @@
                             </div>`;
                     }
                 });
-                if(this.isAdmin) {
+                
+                // ТАНҲО ДАР ПАНЕЛИ АДМИН НАМОИШ ДОДАНИ МАБЛАҒИ УМУМӢ
+                if(document.getElementById('adminTotalValue')) {
                     document.getElementById('adminTotalValue').innerText = totalSum.toLocaleString();
+                }
+                if(document.getElementById('totalAdsCount')) {
                     document.getElementById('totalAdsCount').innerText = count;
                 }
             });
         },
 
-        async loadUsers() {
+        loadUsers() {
             const search = document.getElementById('userSearch').value.toLowerCase();
-            const snap = await db.ref('users').once('value');
-            const list = document.getElementById('adminUsersList');
-            list.innerHTML = ""; let count = 0;
+            // Гӯш кардани рӯйхати корбарон дар ҳолати Realtime
+            db.ref('users').on('value', snap => {
+                const list = document.getElementById('adminUsersList');
+                if(!list) return;
+                list.innerHTML = ""; 
+                let count = 0;
 
-            snap.forEach(u => {
-                const val = u.val();
-                if(!search || val.name.toLowerCase().includes(search) || val.phone.includes(search)) {
-                    count++;
-                    list.innerHTML += `
-                        <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <b>${val.name}</b> ${val.online ? '🟢' : '⚪'}<br>
-                                <small>📞 ${val.phone} | Рол: ${val.role}</small>
-                            </div>
-                            ${val.role !== 'admin' ? `<button onclick="app.deleteUser('${u.key}')" style="background:red; color:white; border:none; padding:5px; border-radius:5px;">Блок</button>` : ''}
-                        </div>`;
-                }
+                snap.forEach(u => {
+                    const val = u.val();
+                    if(!search || (val.name && val.name.toLowerCase().includes(search)) || (val.phone && val.phone.includes(search))) {
+                        count++;
+                        list.innerHTML += `
+                            <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <b>${val.name || 'Бе ном'}</b> ${val.online ? '<span style="color:green">● онлайн</span>' : '<span style="color:gray">● офлайн</span>'}<br>
+                                    <small>📞 ${val.phone || ''} | Рол: ${val.role || 'user'}</small>
+                                </div>
+                                <div>
+                                    ${val.role !== 'admin' ? `<button onclick="app.deleteUser('${u.key}')" style="background:red; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Блок</button>` : '<b>Админ</b>'}
+                                </div>
+                            </div>`;
+                    }
+                });
+                document.getElementById('countUsers').innerText = count;
             });
-            document.getElementById('countUsers').innerText = count;
         },
 
         getLocation() {
             navigator.geolocation.getCurrentPosition(pos => {
                 document.getElementById('pCoords').value = `${pos.coords.latitude},${pos.coords.longitude}`;
                 document.getElementById('locBtn').innerText = "✅ Мавқеъ сабт шуд";
-            });
+                document.getElementById('locBtn').style.background = "#27ae60";
+            }, err => alert("Мавқеъ муайян нашуд"));
         },
 
         async addProduct() {
+            if(!auth.currentUser) return alert("Аввал ворид шавед!");
             const file = document.getElementById('pImg').files[0];
             let img = "";
             if(file) {
@@ -329,10 +206,16 @@
             const pass = document.getElementById('regPass').value;
             const name = document.getElementById('regName').value;
             try {
-                if(this.isLoginMode) await auth.signInWithEmailAndPassword(email, pass);
-                else {
+                if(this.isLoginMode) {
+                    await auth.signInWithEmailAndPassword(email, pass);
+                } else {
                     const res = await auth.createUserWithEmailAndPassword(email, pass);
-                    await db.ref('users/' + res.user.uid).set({ name, phone, role: 'user', online: true });
+                    await db.ref('users/' + res.user.uid).set({ 
+                        name: name, 
+                        phone: phone, 
+                        role: 'user', 
+                        online: true 
+                    });
                 }
                 this.showPage('home');
             } catch(e) { alert("Хато: " + e.message); }
@@ -342,6 +225,7 @@
             document.querySelectorAll('.container > div').forEach(p => p.classList.add('hidden'));
             document.getElementById(id + 'Page').classList.remove('hidden');
             document.querySelector('.nav-links').classList.remove('active');
+            if(id === 'admin') this.loadUsers();
         },
 
         toggleAuthMode() {
@@ -350,11 +234,14 @@
             document.getElementById('regNameDiv').classList.toggle('hidden', this.isLoginMode);
         },
         deleteAd(id) { if(confirm("Нест карда шавад?")) db.ref('products/' + id).remove(); },
-        deleteUser(id) { if(confirm("Блок карда шавад?")) db.ref('users/' + id).remove(); },
-        logout() { auth.signOut(); location.reload(); }
+        deleteUser(id) { if(confirm("Ин корбарро блок мекунед?")) db.ref('users/' + id).remove(); },
+        logout() { 
+            if(auth.currentUser) {
+                db.ref('users/' + auth.currentUser.uid + '/online').set(false);
+            }
+            auth.signOut().then(() => location.reload()); 
+        }
     };
 
     app.init();
 </script>
-</body>
-</html>
