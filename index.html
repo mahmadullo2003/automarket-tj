@@ -3,117 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoMarket Pro - Платформаи Касбӣ</title>
+    <title>AutoMarket Pro + Admin Panel</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    
     <style>
-        :root { --primary: #1a252f; --accent: #f39c12; --success: #27ae60; --danger: #e74c3c; --light: #ecf0f1; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f8f9fa; color: #333; }
-        nav { background: var(--primary); color: white; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
+        :root { --primary: #1a252f; --accent: #f39c12; --success: #27ae60; --wa: #25d366; --danger: #e74c3c; --light: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); }
+
+        nav { background: var(--primary); color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; height: 65px; }
+        .logo { font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+        .logo span { color: var(--accent); }
+
+        .burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; border: none; background: none; }
+        .burger div { width: 25px; height: 3px; background: white; border-radius: 2px; }
+
         .nav-links { display: flex; gap: 20px; align-items: center; }
-        .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.3s; }
-        .nav-links a:hover { color: var(--accent); }
-        .btn-contact { background: var(--accent); color: white !important; padding: 5px 12px; border-radius: 5px; font-weight: bold; }
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .stats-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--accent); }
-        .stat-item { flex: 1; text-align: center; border-right: 1px solid #eee; }
-        .stat-item:last-child { border: none; }
-        .stat-value { display: block; font-size: 1.2rem; font-weight: bold; color: var(--success); }
-        .stat-label { font-size: 0.8rem; color: #7f8c8d; }
-        .search-box { margin-bottom: 25px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .search-box input, .search-box select { padding: 12px; border-radius: 8px; border: 1px solid #ddd; outline: none; }
-        .search-box input { flex: 3; min-width: 200px; }
-        .search-box select { flex: 1; min-width: 120px; }
-        .ads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08); transition: transform 0.3s; position: relative; border: 1px solid #eee; }
-        .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 180px; object-fit: cover; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; }
+
+        @media (max-width: 768px) {
+            .burger { display: flex; }
+            .nav-links { position: absolute; top: 65px; right: -100%; background: var(--primary); width: 250px; height: 100vh; flex-direction: column; padding: 30px; transition: 0.4s; }
+            .nav-links.active { right: 0; }
+            .nav-links a { width: 100%; padding: 15px 0; border-bottom: 1px solid #34495e; }
+        }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        .modal { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 450px; margin: 10px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        label { font-size: 0.8rem; font-weight: bold; color: #666; margin-top: 12px; display: block; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        
+        .btn-submit { width: 100%; padding: 14px; margin-top: 25px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .ads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #eee; position: relative; }
         .card-body { padding: 15px; }
-        .card-tag { background: var(--primary); color: white; padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; position: absolute; top: 10px; left: 10px; z-index: 1; }
-        .type-tag { background: var(--accent); color: white; padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; position: absolute; top: 10px; right: 10px; z-index: 1; }
-        .price { font-size: 1.3rem; color: var(--success); font-weight: bold; margin: 5px 0; }
-        .info-row { font-size: 0.85rem; margin-bottom: 4px; display: flex; justify-content: space-between; }
-        .btn-group { display: flex; gap: 8px; margin-top: 10px; }
-        .btn-wa { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 8px; flex: 1; text-align: center; font-weight: bold; font-size: 0.9rem; }
-        .btn-call { background: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 8px; flex: 1; text-align: center; font-weight: bold; font-size: 0.9rem; }
-        .admin-panel { background: #e3f2fd; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #2196f3; }
-        .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; background: white; margin-bottom: 5px; border-radius: 5px; }
+        
+        /* Стили Админа */
+        .admin-badge { background: var(--danger); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px; }
+        .admin-only { border: 2px solid var(--danger) !important; }
+        .btn-delete { position: absolute; top: 10px; right: 10px; background: rgba(231, 76, 60, 0.9); color: white; border: none; padding: 8px; border-radius: 50%; cursor: pointer; z-index: 10; }
+        
+        .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; align-items: center; }
+        .btn-wa { background: var(--wa); color: white; text-decoration: none; display: block; text-align: center; padding: 10px; border-radius: 8px; margin-top: 5px; font-weight: bold; }
+        .btn-call { background: var(--primary); color: white; text-decoration: none; display: block; text-align: center; padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: bold; }
+        
         .hidden { display: none !important; }
-        .modal { background: white; padding: 25px; border-radius: 15px; max-width: 500px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        textarea { height: 80px; resize: none; font-family: inherit; }
-        label { font-size: 0.85rem; font-weight: bold; color: #555; margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
 
 <nav>
-    <div style="font-size: 1.5rem; font-weight: bold; cursor:pointer" onclick="app.showPage('home')">Auto<span style="color:var(--accent)">Market</span></div>
-    <div class="nav-links">
+    <div class="logo" onclick="app.showPage('home')">Auto<span>Market</span></div>
+    <button class="burger" onclick="app.toggleMenu()"><div></div><div></div><div></div></button>
+    <div class="nav-links" id="navLinks">
         <a onclick="app.showPage('home')">🏠 Асосӣ</a>
-        <a href="tel:933099029" class="btn-contact">📞 Алоқа бо Админ</a>
         <a onclick="app.showPage('add')" id="addBtn" class="hidden">➕ Эълон</a>
+        <a onclick="app.showPage('admin')" id="adminBtn" class="hidden" style="color:var(--danger)">⚙️ Админ</a>
         <a onclick="app.showPage('login')" id="loginLink">🔑 Воридшавӣ</a>
-        <span id="userInfo" style="font-size: 0.85rem; color: #bdc3c7; margin-left: 10px;"></span>
         <a onclick="app.logout()" id="logoutLink" class="hidden">🚪 Баромад</a>
     </div>
 </nav>
 
 <div class="container">
-    <div id="statsSection" class="stats-bar hidden">
-        <div class="stat-item">
-            <span class="stat-value" id="userItemsCount">0</span>
-            <span class="stat-label">Молҳои шумо</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-value" id="userTotalSum">0 c.</span>
-            <span class="stat-label">Маблағи умумӣ</span>
-        </div>
-    </div>
-
-    <div id="searchArea" class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 Номи запчаст ё мошин..." onkeyup="app.filterProducts()">
-        <select id="typeFilter" onchange="app.filterProducts()">
-            <option value="">Намуд</option>
-            <option value="Ходовой">Ходовой</option>
-            <option value="Электронӣ">Электронӣ</option>
-            <option value="Мотор">Мотор</option>
-            <option value="Кузов">Кузов</option>
-        </select>
-    </div>
-
-    <div id="adminPanel" class="admin-panel hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-            <h3>👥 Админ Панел</h3>
-            <div>
-                <span>База: </span>
-                <span id="adminGrandTotal" style="color:var(--success); font-weight:bold">0 c.</span>
-            </div>
-        </div>
-        <div id="allUsersList"></div>
-    </div>
-
     <div id="homePage">
         <div id="adsGrid" class="ads-grid"></div>
     </div>
 
-    <div id="loginPage" class="hidden">
-        <div class="modal">
-            <h2 id="loginTitle">Воридшавӣ / Қайд</h2>
-            <div id="userLoginFields">
-                <input type="text" id="regName" placeholder="Номи пурра">
-                <input type="number" id="regPhone" placeholder="933XXXXXX">
-                <input type="password" id="regPass" placeholder="Рамзи шумо (барои воридшавии минбаъда)">
-                <p style="font-size: 0.75rem; color: #666;">* Агар бори аввал бошед, рамзро худатон эҷод кунед. Дафъаи дигар бо ҳамин рамз ворид мешавед.</p>
-                <button onclick="app.handleAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--success); color:white; border:none; border-radius:8px; cursor:pointer">Ворид шудан</button>
+    <div id="adminPage" class="hidden">
+        <div class="modal" style="max-width: 800px;">
+            <h2>🛠️ Панели идоракунии Админ</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button onclick="app.loadUsers()" style="padding: 10px; cursor: pointer;">👥 Корбарон</button>
+                <button onclick="app.showPage('home')" style="padding: 10px; cursor: pointer;">📦 Ҳамаи эълонҳо</button>
             </div>
-            <hr>
-            <button onclick="app.toggleAdminLogin()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:0.8rem">🔓 Ман Админ ҳастам</button>
-            
-            <div id="adminLoginFields" class="hidden">
-                <input type="text" id="adminUser" placeholder="Логини Админ">
-                <input type="password" id="adminPass" placeholder="Пароли Админ">
-                <button onclick="app.handleAdminAuth()" style="width:100%; padding:12px; margin-top:15px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer">Ворид шудан ба Панел</button>
+            <div id="adminContent">
+                <p>Барои дидани рӯйхати корбарон тугмаи болоро пахш кунед.</p>
             </div>
         </div>
     </div>
@@ -121,54 +86,31 @@
     <div id="addPage" class="hidden">
         <div class="modal">
             <h2>📦 Эълони нав</h2>
-            <label>Марка</label>
-            <select id="pCarBrand" onchange="app.updateModels()">
-                <option value="">-- Интихоб --</option>
-                <option value="Opel">Opel</option>
-                <option value="Toyota">Toyota</option>
-                <option value="Mercedes-Benz">Mercedes-Benz</option>
-                <option value="BMW">BMW</option>
-                <option value="Hyundai">Hyundai</option>
-                <option value="Kia">Kia</option>
-                <option value="LADA">LADA</option>
-                <option value="Lexus">Lexus</option>
-            </select>
-            <label>Модел</label>
-            <select id="pCarModel"><option value="">-- Аввал марка --</option></select>
-            <label>Соли мошин</label>
-            <select id="pCarYear"></select>
-            <label>Навъи запчаст</label>
-            <select id="pType">
-                <option value="Ходовой">Ходовой</option>
-                <option value="Электронӣ">Электронӣ</option>
-                <option value="Мотор">Мотор</option>
-                <option value="Кузов">Кузов</option>
-            </select>
-            <label>Номи запчаст</label>
-            <input type="text" id="pName" placeholder="Масалан: Радиатор">
-            <label>Нарх (сомонӣ)</label>
-            <input type="number" id="pPrice">
-            <label>Шаҳр</label>
-            <select id="pCity">
-                <option value="Душанбе">Душанбе</option>
-                <option value="Хуҷанд">Хуҷанд</option>
-                <option value="Бохтар">Бохтар</option>
-                <option value="Кӯлоб">Айнӣ</option>
-            </select>
-            <label>Санаи нашр</label>
-            <input type="date" id="pAdDate">
-            <label>Маълумот</label>
-            <textarea id="pDesc" placeholder="Ҳолати запчаст..."></textarea>
-            <label>Сурат</label>
-            <input type="file" id="pImg" accept="image/*">
-            <button onclick="app.addProduct()" style="width:100%; padding:12px; margin-top:20px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer">Нашр кардан</button>
+            <label>Марка</label><select id="pCarBrand" onchange="app.updateModels()"></select>
+            <label>Модел</label><select id="pCarModel"></select>
+            <label>Номи запчаст</label><input type="text" id="pName">
+            <label>Нарх (сомонӣ)</label><input type="number" id="pPrice">
+            <label>Мавқеъ</label>
+            <button type="button" onclick="app.getLocation()" id="locBtn" style="width:100%; padding:8px; background:#eee; border:1px dashed #999;">📍 Муайян кардани ҷой</button>
+            <input type="hidden" id="pCoords">
+            <label>Сурат</label><input type="file" id="pImg" accept="image/*">
+            <button class="btn-submit" onclick="app.addProduct()">Нашр кардан</button>
+        </div>
+    </div>
+
+    <div id="loginPage" class="hidden">
+        <div class="modal">
+            <h2 id="authTitle">Воридшавӣ</h2>
+            <div id="regNameDiv" class="hidden"><label>Ном</label><input type="text" id="regName"></div>
+            <label>Телефон</label><input type="number" id="regPhone">
+            <label>Рамз</label><input type="password" id="regPass">
+            <button class="btn-submit" style="background:var(--success)" onclick="app.handleAuth()">Давом додан</button>
+            <p onclick="app.toggleAuthMode()" style="text-align:center; cursor:pointer; font-size:0.8rem">Қайд кардан</p>
         </div>
     </div>
 </div>
 
 <script>
-    const ADMIN_CRED = { user: "admin", pass: "25092003" };
-
     const firebaseConfig = {
         apiKey: "AIzaSyCOYjoU34k2CDWVZd7D4XvhXAwgFK_LxlE",
         authDomain: "automarkettj.firebaseapp.com",
@@ -176,239 +118,160 @@
         projectId: "automarkettj",
         storageBucket: "automarkettj.firebasestorage.app",
         messagingSenderId: "614498527268",
-        appId: "1:614498527268:web:ff06a8f246df42ac1ad0b1",
-        measurementId: "G-1PXXWX9TT2"
+        appId: "1:614498527268:web:ff06a8f246df42ac1ad0b1"
     };
 
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
 
     const app = {
-        currentUser: JSON.parse(localStorage.getItem('activeUser')),
-        allProducts: [],
+        isLogin: true,
+        isAdmin: false,
         carDatabase: {
-            "Opel": ["Astra G", "Astra H", "Vectra B", "Zafira"],
-            "Toyota": ["Camry 50", "Camry 70", "Corolla", "Prado"],
-            "Mercedes-Benz": ["W210", "W211", "W212", "Sprinter"],
-            "BMW": ["E39", "E60", "F10", "X5"],
-            "Hyundai": ["Elantra", "Sonata", "Solaris"],
-            "Kia": ["Optima", "K5", "Rio"],
-            "LADA": ["Priora", "Vesta", "2107"],
-            "Lexus": ["RX350", "GX470", "LX570"]
+            "Opel": ["Astra G", "Astra H", "Vectra B", "Vectra C", "Zafira"],
+            "Toyota": ["Camry 50", "Camry 70", "Prado 150", "Land Cruiser 200"],
+            "Mercedes-Benz": ["W210", "W211", "W212", "Sprinter", "G-Class"],
+            "BMW": ["E39", "E60", "F10", "X5 E53", "X5 E70"],
+            "Hyundai": ["Elantra", "Sonata", "Santa Fe", "Tucson"],
+            "LADA": ["Priora", "Vesta", "Granta", "2107"]
         },
 
         init() {
-            this.fillYears();
-            this.checkUserStatus();
-            this.loadProducts();
-            this.setDefaultDate();
-            if(this.currentUser?.isAdmin) this.loadAdminUsers();
+            this.fillBrands();
+            auth.onAuthStateChanged(async user => {
+                if(user) {
+                    const snap = await db.ref('users/' + user.uid).once('value');
+                    const userData = snap.val();
+                    this.isAdmin = userData && userData.role === 'admin';
+                    
+                    document.getElementById('addBtn').classList.remove('hidden');
+                    document.getElementById('logoutLink').classList.remove('hidden');
+                    document.getElementById('loginLink').classList.add('hidden');
+                    if(this.isAdmin) document.getElementById('adminBtn').classList.remove('hidden');
+                }
+            });
+            this.loadAds();
         },
 
-        setDefaultDate() {
-            const now = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('pAdDate');
-            if(dateInput) dateInput.value = now;
-        },
-
-        showPage(id) {
-            ['home', 'login', 'add'].forEach(p => document.getElementById(p + 'Page').classList.add('hidden'));
-            document.getElementById(id + 'Page').classList.remove('hidden');
-            document.getElementById('searchArea').classList.toggle('hidden', id !== 'home');
-        },
-
-        fillYears() {
-            const s = document.getElementById('pCarYear');
-            for(let i=2025; i>=1990; i--) s.innerHTML += `<option value="${i}">${i}</option>`;
+        fillBrands() {
+            const b = document.getElementById('pCarBrand');
+            b.innerHTML = '<option value="">-- Интихоб --</option>';
+            Object.keys(this.carDatabase).forEach(k => b.innerHTML += `<option value="${k}">${k}</option>`);
         },
 
         updateModels() {
-            const brand = document.getElementById('pCarBrand').value;
-            const modelSelect = document.getElementById('pCarModel');
-            modelSelect.innerHTML = "";
-            if(this.carDatabase[brand]) {
-                this.carDatabase[brand].forEach(m => {
-                    modelSelect.innerHTML += `<option value="${m}">${m}</option>`;
-                });
-            }
+            const b = document.getElementById('pCarBrand').value;
+            const m = document.getElementById('pCarModel');
+            m.innerHTML = "";
+            if(this.carDatabase[b]) this.carDatabase[b].forEach(i => m.innerHTML += `<option value="${i}">${i}</option>`);
         },
 
-        toggleAdminLogin() {
-            document.getElementById('userLoginFields').classList.toggle('hidden');
-            document.getElementById('adminLoginFields').classList.toggle('hidden');
-            document.getElementById('loginTitle').innerText = 
-                document.getElementById('adminLoginFields').classList.contains('hidden') ? "Воридшавӣ / Қайд" : "Вуруди Админ";
-        },
-
-        async handleAdminAuth() {
-            const u = document.getElementById('adminUser').value;
-            const p = document.getElementById('adminPass').value;
-            if(u === ADMIN_CRED.user && p === ADMIN_CRED.pass) {
-                const adminData = { name: "Администратор", isAdmin: true, phone: "ADMIN" };
-                localStorage.setItem('activeUser', JSON.stringify(adminData));
-                location.reload();
-            } else { alert("Логин ё Пароли хато!"); }
-        },
-
-        async handleAuth() {
-            const name = document.getElementById('regName').value;
-            const phone = document.getElementById('regPhone').value;
-            const pass = document.getElementById('regPass').value;
-            
-            if(!phone || !name || !pass) return alert("Пур кунед!");
-            
-            db.ref('users/' + phone).once('value', async snap => {
-                const u = snap.val();
-                if(u) {
-                    // Агар корбар вуҷуд дошта бошад, рамзро месанҷем
-                    if(u.accessCode === pass) {
-                        const userData = { name: u.name, phone, status: 'active', isAdmin: false };
-                        localStorage.setItem('activeUser', JSON.stringify(userData));
-                        location.reload();
-                    } else {
-                        alert("Рамз хато аст!");
-                    }
-                } else {
-                    // Агар корбар нав бошад, қайд мекунем
-                    const userData = { name, phone, accessCode: pass, status: 'active' };
-                    await db.ref('users/' + phone).set(userData);
-                    localStorage.setItem('activeUser', JSON.stringify({ name, phone, status: 'active', isAdmin: false }));
-                    alert("Шумо бо муваффақият қайд шудед!");
-                    location.reload();
-                }
-            });
-        },
-
-        logout() { localStorage.removeItem('activeUser'); location.reload(); },
-
-        checkUserStatus() {
-            if(!this.currentUser) return;
-            document.getElementById('userInfo').innerText = `👤 ${this.currentUser.name}`;
-            document.getElementById('logoutLink').classList.remove('hidden');
-            document.getElementById('loginLink').classList.add('hidden');
-            
-            if(this.currentUser.isAdmin) {
-                document.getElementById('addBtn').classList.remove('hidden');
-                return;
-            }
-
-            db.ref('users/' + this.currentUser.phone).on('value', snap => {
-                const u = snap.val();
-                if(u && u.status === 'active') {
-                    document.getElementById('addBtn').classList.remove('hidden');
-                    document.getElementById('statsSection').classList.remove('hidden');
-                }
-            });
-        },
-
-        async addProduct() {
-            const file = document.getElementById('pImg').files[0];
-            let imgBase64 = "";
-            if(file) {
-                imgBase64 = await new Promise(r => {
-                    const reader = new FileReader();
-                    reader.onload = () => r(reader.result);
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            const p = {
-                brand: document.getElementById('pCarBrand').value,
-                model: document.getElementById('pCarModel').value,
-                year: document.getElementById('pCarYear').value,
-                type: document.getElementById('pType').value,
-                name: document.getElementById('pName').value,
-                price: parseFloat(document.getElementById('pPrice').value) || 0,
-                city: document.getElementById('pCity').value,
-                adDate: document.getElementById('pAdDate').value,
-                desc: document.getElementById('pDesc').value,
-                img: imgBase64,
-                phone: this.currentUser.phone,
-                seller: this.currentUser.name,
-                created: new Date().toLocaleString()
-            };
-
-            await db.ref('products').push(p);
-            alert("Нашр шуд!");
-            this.showPage('home');
-        },
-
-        loadProducts() {
-            db.ref('products').on('value', snap => {
-                this.allProducts = [];
-                let mySum = 0; let grand = 0;
-                snap.forEach(child => {
-                    const p = child.val();
-                    p.id = child.key;
-                    this.allProducts.push(p);
-                    grand += p.price;
-                    if(this.currentUser && p.phone === this.currentUser.phone) mySum += p.price;
-                });
-                if(document.getElementById('userItemsCount')) document.getElementById('userItemsCount').innerText = this.allProducts.filter(x => x.phone === this.currentUser?.phone).length;
-                if(document.getElementById('userTotalSum')) document.getElementById('userTotalSum').innerText = mySum.toLocaleString() + " c.";
-                if(this.currentUser?.isAdmin) document.getElementById('adminGrandTotal').innerText = grand.toLocaleString() + " c.";
-                this.renderProducts(this.allProducts);
-            });
-        },
-
-        renderProducts(list) {
-            const grid = document.getElementById('adsGrid');
-            grid.innerHTML = "";
-            list.slice().reverse().forEach(p => {
-                const isOwner = this.currentUser && (p.phone === this.currentUser.phone || this.currentUser.isAdmin);
-                grid.innerHTML += `
-                    <div class="card">
-                        <span class="card-tag">${p.brand} ${p.model}</span>
-                        <span class="type-tag">${p.type}</span>
-                        <img src="${p.img || 'https://via.placeholder.com/300x180?text=No+Image'}">
-                        <div class="card-body">
-                            ${isOwner ? `<button onclick="app.deleteP('${p.id}')" style="float:right; border:none; background:none; cursor:pointer">🗑️</button>` : ''}
-                            <h3 style="margin:0">${p.name}</h3>
-                            <div class="price">${p.price} c.</div>
-                            <div class="info-row"><span>📅 Санаи нашр:</span> <b>${p.adDate || '---'}</b></div>
-                            <div class="info-row"><span>📍 Шаҳр:</span> <b>${p.city}</b></div>
-                            <div class="info-row"><span>📅 Соли мошин:</span> <b>${p.year}</b></div>
-                            <div class="info-row"><span>👤 Фурӯшанда:</span> <b>${p.seller}</b></div>
-                            <p style="font-size:0.8rem; color:#666; background:#f9f9f9; padding:5px; border-radius:5px">${p.desc || 'Маълумот нест'}</p>
-                            <div class="btn-group">
-                                <a href="tel:+992${p.phone}" class="btn-call">📞 Занг</a>
-                                <a href="https://wa.me/992${p.phone}" class="btn-wa">💬 WA</a>
-                            </div>
-                        </div>
+        async loadUsers() {
+            if(!this.isAdmin) return;
+            const snap = await db.ref('users').once('value');
+            let html = "<h3>Рӯйхати корбарон</h3>";
+            snap.forEach(u => {
+                const val = u.val();
+                html += `
+                    <div class="user-row">
+                        <span>${val.name} (${val.phone}) ${val.role === 'admin' ? '<b>[Admin]</b>' : ''}</span>
+                        ${val.role !== 'admin' ? `<button onclick="app.deleteUser('${u.key}')" style="color:red">Блок</button>` : ''}
                     </div>`;
             });
+            document.getElementById('adminContent').innerHTML = html;
         },
 
-        filterProducts() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const type = document.getElementById('typeFilter').value;
-            const filtered = this.allProducts.filter(p => {
-                const matchSearch = (p.name + p.brand + p.model).toLowerCase().includes(term);
-                const matchType = type === "" || p.type === type;
-                return matchSearch && matchType;
-            });
-            this.renderProducts(filtered);
+        async deleteUser(uid) {
+            if(confirm("Корбарро блок кардан мехоҳед?")) {
+                await db.ref('users/' + uid).remove();
+                this.loadUsers();
+            }
         },
 
-        loadAdminUsers() {
-            document.getElementById('adminPanel').classList.remove('hidden');
-            db.ref('users').on('value', snap => {
-                const list = document.getElementById('allUsersList');
-                list.innerHTML = "<h4>Рӯйхати корбарони база</h4>";
+        async deleteAd(id) {
+            if(confirm("Ин эълонро нест кардан мехоҳед?")) {
+                await db.ref('products/' + id).remove();
+            }
+        },
+
+        loadAds() {
+            db.ref('products').on('value', snap => {
+                const grid = document.getElementById('adsGrid');
+                grid.innerHTML = "";
                 snap.forEach(child => {
-                    const u = child.val();
-                    if(child.key === "ADMIN") return;
-                    list.innerHTML += `
-                        <div class="user-row">
-                            <span><b>${u.name}</b> (${child.key}) - Рамз: <b style="color:red">${u.accessCode}</b></span>
-                            <div><button onclick="app.delUser('${child.key}')">❌</button></div>
+                    const p = child.val();
+                    const isOwner = auth.currentUser && (auth.currentUser.uid === p.uid || this.isAdmin);
+                    grid.innerHTML += `
+                        <div class="card">
+                            ${isOwner ? `<button class="btn-delete" onclick="app.deleteAd('${child.key}')">🗑️</button>` : ''}
+                            <img src="${p.img || 'https://via.placeholder.com/300x200'}" style="width:100%">
+                            <div class="card-body">
+                                <h3 style="margin:0">${p.name}</h3>
+                                <b style="color:var(--success)">${p.price} c.</b>
+                                <p style="font-size:0.8rem">${p.brand} ${p.model}</p>
+                                <a href="tel:+992${p.phone}" class="btn-call">📞 Занг задан</a>
+                                <a href="https://wa.me/992${p.phone}" class="btn-wa">💬 WhatsApp</a>
+                            </div>
                         </div>`;
                 });
             });
         },
 
-        delUser(ph) { if(confirm("Нест карда шавад?")) db.ref('users/' + ph).remove(); },
-        deleteP(id) { if(confirm("Эълон нест шавад?")) db.ref('products/' + id).remove(); }
+        // Функсияҳои дигар (Auth, Location, Navigation) бетағйир монданд
+        getLocation() {
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('pCoords').value = `${pos.coords.latitude},${pos.coords.longitude}`;
+                document.getElementById('locBtn').innerText = "✅ Мавқеъ сабт шуд";
+            });
+        },
+        async addProduct() {
+            const file = document.getElementById('pImg').files[0];
+            let img = "";
+            if(file) {
+                img = await new Promise(r => {
+                    const reader = new FileReader();
+                    reader.onload = () => r(reader.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+            await db.ref('products').push({
+                brand: document.getElementById('pCarBrand').value,
+                model: document.getElementById('pCarModel').value,
+                name: document.getElementById('pName').value,
+                price: document.getElementById('pPrice').value,
+                coords: document.getElementById('pCoords').value,
+                img: img,
+                uid: auth.currentUser.uid,
+                phone: auth.currentUser.email.split('@')[0]
+            });
+            this.showPage('home');
+        },
+        toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); },
+        showPage(id) {
+            ['home', 'login', 'add', 'admin'].forEach(p => document.getElementById(p + 'Page').classList.add('hidden'));
+            document.getElementById(id + 'Page').classList.remove('hidden');
+            document.getElementById('navLinks').classList.remove('active');
+        },
+        toggleAuthMode() {
+            this.isLogin = !this.isLogin;
+            document.getElementById('authTitle').innerText = this.isLogin ? "Воридшавӣ" : "Қайдгирӣ";
+            document.getElementById('regNameDiv').classList.toggle('hidden', this.isLogin);
+        },
+        async handleAuth() {
+            const email = document.getElementById('regPhone').value + "@auto.tj";
+            const pass = document.getElementById('regPass').value;
+            const name = document.getElementById('regName').value;
+            try {
+                if(this.isLogin) await auth.signInWithEmailAndPassword(email, pass);
+                else {
+                    const res = await auth.createUserWithEmailAndPassword(email, pass);
+                    await db.ref('users/' + res.user.uid).set({ name, phone: document.getElementById('regPhone').value, role: 'user' });
+                }
+                this.showPage('home');
+            } catch(e) { alert(e.message); }
+        },
+        logout() { auth.signOut(); location.reload(); }
     };
 
     app.init();
