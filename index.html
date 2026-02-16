@@ -329,13 +329,73 @@
         },
         toggleAuthMode() {
             this.isLoginMode = !this.isLoginMode;
-            document.getElementById('authTitle').innerText = this.isLoginMode ? "Воридшавӣ" : "Қайдгирӣ";
+            document.getElementById('authTitle').innerText = this.isLoginMode ? "Воридшавӣ" : "Бақайдгирӣ";
             document.getElementById('regNameDiv').classList.toggle('hidden', this.isLoginMode);
         },
         deleteAd(id) { if(confirm("Нест карда шавад?")) db.ref('products/' + id).remove(); },
         deleteUser(id) { if(confirm("Блок карда шавад?")) db.ref('users/' + id).remove(); },
         logout() { if(auth.currentUser) db.ref('users/' + auth.currentUser.uid + '/online').set(false); auth.signOut().then(() => location.reload()); }
     };
+
+
+loadUsers() {
+    const search = document.getElementById('userSearch').value.toLowerCase();
+    
+    // 1. Аввал ҳисоб кардани маблағ ва миқдори эълонҳои ҳар як корбар
+    db.ref('products').once('value', adsSnap => {
+        const userStats = {};
+        adsSnap.forEach(ad => {
+            const data = ad.val();
+            if(data.uid) {
+                if(!userStats[data.uid]) userStats[data.uid] = { count: 0, total: 0 };
+                userStats[data.uid].count++;
+                userStats[data.uid].total += Number(data.price || 0);
+            }
+        });
+
+        // 2. Бор кардани рӯйхати корбарон
+        db.ref('users').on('value', snap => {
+            const list = document.getElementById('adminUsersList');
+            if(!list) return;
+            list.innerHTML = ""; 
+            let totalUsers = 0;
+            let onlineUsers = 0;
+
+            snap.forEach(u => {
+                const val = u.val();
+                const uid = u.key;
+                const stats = userStats[uid] || { count: 0, total: 0 };
+
+                if(val.online) onlineUsers++;
+                totalUsers++;
+
+                // Филтр аз рӯи телефон
+                if(!search || (val.phone && val.phone.includes(search))) {
+                    list.innerHTML += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 12px;">
+                                <b>${val.name || 'Номаълум'}</b> 
+                                ${val.online ? '<span style="color:green; font-size:12px;">● онлайн</span>' : '<span style="color:#ccc; font-size:12px;">○ офлайн</span>'}
+                            </td>
+                            <td style="padding: 12px;">${val.phone}</td>
+                            <td style="padding: 12px;"><code style="background:#fef9e7; padding:2px 5px;">${val.pass || '---'}</code></td>
+                            <td style="padding: 12px;">
+                                <span style="color:var(--accent); font-weight:bold;">${stats.count} адад</span><br>
+                                <small style="color:var(--success)">${stats.total.toLocaleString()} с.</small>
+                            </td>
+                            <td style="padding: 12px;">
+                                ${val.role !== 'admin' ? 
+                                `<button onclick="app.deleteUser('${uid}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.2rem;">🚫</button>` 
+                                : '<span style="font-size:12px; color:blue;">Админ</span>'}
+                            </td>
+                        </tr>`;
+                }
+            });
+            document.getElementById('countUsers').innerText = totalUsers;
+            document.getElementById('adminOnlineCount').innerText = onlineUsers;
+        });
+    });
+}
 
     app.init();
 </script>
