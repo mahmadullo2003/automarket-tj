@@ -3,402 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Қисмҳои Эҳтиётӣ (Запчаст) - Admin Panel</title>
+    <title>AutoMarket Pro V6 - Чат ва Муошират</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-    
+
     <style>
-        :root { --primary: #2c3e50; --accent: #e67e22; --success: #27ae60; --wa: #25d366; --danger: #e74c3c; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--light); }
+        :root { --primary: #1a252f; --accent: #f39c12; --success: #27ae60; --bg: #f8f9fa; --card: #ffffff; --text: #333; }
+        body.dark-mode { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #000; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 60px; transition: 0.3s; }
         
-        /* Navbar & Burger Menu */
-        nav { background: var(--primary); color: white; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; height: 70px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .logo { font-size: 1.4rem; font-weight: bold; cursor: pointer; }
-        .logo span { color: var(--accent); }
-        
-        .nav-links { display: flex; gap: 15px; align-items: center; }
-        .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.3s; }
-        .nav-links a:hover { color: var(--accent); }
+        nav { background: var(--primary); color: white; padding: 0.8rem 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .nav-links a { color: white; text-decoration: none; cursor: pointer; margin-left: 15px; font-weight: bold; }
 
-        .burger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
-        .burger div { width: 25px; height: 3px; background: white; border-radius: 5px; }
-
-        /* General UI */
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        
-        .search-area { background: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-        
         .ads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); position: relative; transition: 0.3s; border: 1px solid #eee; }
-        .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card { background: var(--card); border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .card img { width: 100%; height: 180px; object-fit: cover; }
         .card-body { padding: 15px; }
-        .price-tag { color: var(--success); font-size: 1.4rem; font-weight: bold; margin: 10px 0; display: block; }
-        
-        .btn-action { width: 100%; padding: 12px; border-radius: 8px; margin-top: 8px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; display: block; text-align: center; box-sizing: border-box; }
-        
-        .modal { background: white; padding: 30px; border-radius: 15px; width: 100%; max-width: 550px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+
+        /* Стили ЧАТ */
+        #chat-window { position: fixed; bottom: 0; right: 20px; width: 300px; height: 400px; background: var(--card); border-radius: 15px 15px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 2000; transition: 0.3s; }
+        .chat-header { background: var(--primary); color: white; padding: 10px; border-radius: 15px 15px 0 0; cursor: pointer; display: flex; justify-content: space-between; }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 0.9rem; }
+        .msg { margin-bottom: 8px; padding: 8px; border-radius: 8px; max-width: 80%; }
+        .msg.sent { background: var(--success); color: white; align-self: flex-end; margin-left: auto; }
+        .msg.received { background: #eee; color: #333; }
+        .chat-input { display: flex; padding: 10px; border-top: 1px solid #eee; }
+        .chat-input input { flex: 1; border: 1px solid #ddd; padding: 5px; border-radius: 5px; }
+
+        .btn-chat { background: #9b59b6; color: white; padding: 8px; border-radius: 5px; text-align: center; font-size: 0.8rem; flex: 1; text-decoration: none; cursor: pointer; display: block; margin-top: 5px;}
         .hidden { display: none !important; }
-
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links { display: none; position: absolute; top: 70px; left: 0; width: 100%; background: var(--primary); flex-direction: column; padding: 20px 0; border-top: 1px solid #444; }
-            .nav-links.active { display: flex; }
-            .burger { display: flex; }
-        }
     </style>
 </head>
 <body>
 
 <nav>
-    <div class="logo" onclick="app.showPage('home')">Қисмҳо<span>TJ</span></div>
-    <div class="burger" onclick="document.querySelector('.nav-links').classList.toggle('active')">
-        <div></div><div></div><div></div>
-    </div>
+    <div onclick="app.showPage('home')" style="cursor:pointer; font-weight:bold; font-size:1.4rem">AutoMarket <span style="color:var(--accent)">V6</span></div>
     <div class="nav-links">
-        <a onclick="app.showPage('home')">🏠 Асосӣ</a>
-        <a onclick="app.showPage('add')" id="addBtn" class="hidden">➕ Эълони нав</a>
-        <a onclick="app.showPage('admin')" id="adminBtn" class="hidden" style="color:var(--accent)">⚙️ Админ</a>
-        <a onclick="app.showPage('login')" id="loginLink">🔑 Воридшавӣ</a>
-        <a onclick="app.logout()" id="logoutLink" class="hidden">🚪 Баромад</a>
+        <a onclick="app.showPage('home')">🏠</a>
+        <a onclick="app.showPage('requests')">🔍</a>
+        <a onclick="app.showPage('add')" id="addBtn" class="hidden">➕</a>
+        <a onclick="app.showPage('login')" id="loginLink">🔑</a>
     </div>
 </nav>
 
 <div class="container">
-    <div id="homePage">
-        <div class="search-area">
-            <input type="text" id="searchName" placeholder="🔍 Номи қисм..." oninput="app.loadAds()">
-            <select id="searchBrand" onchange="app.loadAds()">
-                <option value="">Ҳамаи маркаҳо</option>
-            </select>
-            <select id="searchType" onchange="app.loadAds()">
-                <option value="">Ҳамаи намудҳо</option>
-                <option>Хадавой</option>
-                <option>Электронӣ</option>
-                <option>Кузов</option>
-                <option>Матор/Коробка</option>
-                <option>Дигар</option>
-            </select>
-        </div>
-        <div id="adsGrid" class="ads-grid"></div>
-    </div>
-
-    <div id="adminPage" class="hidden">
-        <h2>🛠️ Идоракунии Система</h2>
-        <div class="stats-bar">
-            <div class="stat-card">👤 Истифодабарандагон: <b id="countUsers">0</b></div>
-            <div class="stat-card">📦 Ҳамаи маҳсулот: <b id="totalAdsCount">0</b></div>
-            <div class="stat-card" style="border: 2px solid var(--success);">💰 Нархи умумӣ: <b id="adminTotalValue">0</b> с.</div>
-            <div class="stat-card">🟢 Онлайн: <b id="adminOnlineCount">0</b></div>
-        </div>
-        
-        <div class="modal" style="max-width: 100%; margin-top: 20px;">
-            <h3>Рӯйхати корбарон</h3>
-            <input type="text" id="userSearch" placeholder="🔍 Ҷустуҷӯи корбар (ном ё телефон)..." oninput="app.loadUsers()" style="margin-bottom: 15px;">
-            <div id="adminUsersList"></div>
-        </div>
-    </div>
-
-    <div id="addPage" class="hidden">
-        <div class="modal">
-            <h2>📦 Эълони қисми нав</h2>
-            <label>Маркаи мошин</label>
-            <select id="pCarBrand" onchange="app.updateModels()"></select>
-            <label>Модели мошин</label>
-            <select id="pCarModel"></select>
-            <label>Намуди қисм</label>
-            <select id="pPartType">
-                <option>Хадавой</option>
-                <option>Электронӣ</option>
-                <option>Кузов</option>
-                <option>Матор/Коробка</option>
-                <option>Дигар</option>
-            </select>
-            <label>Соли мошин</label>
-            <input type="number" id="pYear" placeholder="Масалан: 2010">
-            <label>Номи қисм ва маълумот</label>
-            <textarea id="pDesc" placeholder="Масалан: Фараҳои Toyota Camry 50, ҳолати нав..."></textarea>
-            <label>Нарх (сомонӣ)</label>
-            <input type="number" id="pPrice">
-            <label>Сурат</label>
-            <input type="file" id="pImg" accept="image/*">
-            <button onclick="app.getLocation()" id="locBtn" class="btn-action" style="background:#3498db; color:white;">📍 Мавқеъро муайян кун</button>
-            <input type="hidden" id="pCoords">
-            <button class="btn-action" style="background:var(--accent); color:white; margin-top:20px;" onclick="app.addProduct()">Нашр кардан</button>
-        </div>
+    <div id="homePage"><div id="adsGrid" class="ads-grid"></div></div>
+    
+    <div id="requestsPage" class="hidden">
+        <h2>Дархостҳо</h2>
+        <div id="requestsList"></div>
     </div>
 
     <div id="loginPage" class="hidden">
-        <div class="modal">
-            <h2 id="authTitle">Воридшавӣ</h2>
-            <div id="regNameDiv" class="hidden"><label>Номи шумо</label><input type="text" id="regName"></div>
-            <label>Рақами телефон (бе +992)</label><input type="number" id="regPhone" placeholder="933000000">
-            <label>Рамз</label><input type="password" id="regPass">
-            <button onclick="app.handleAuth()" class="btn-action" style="background:var(--success); color:white;">Давом додан</button>
-            <p onclick="app.toggleAuthMode()" style="text-align:center; cursor:pointer; color:blue; margin-top:15px;">Қайдгирӣ</p>
+        <div style="max-width:300px; margin: 50px auto; background:white; padding:20px; border-radius:10px">
+            <input type="text" id="uName" placeholder="Ном" style="width:100%; margin-bottom:10px">
+            <input type="number" id="uPhone" placeholder="Рақам" style="width:100%; margin-bottom:10px">
+            <button onclick="app.auth()" style="width:100%; background:var(--accent); color:white; border:none; padding:10px">Даромад</button>
         </div>
     </div>
 </div>
 
+<div id="chat-window" class="hidden">
+    <div class="chat-header" onclick="document.getElementById('chat-window').classList.add('hidden')">
+        <span id="chat-with-name">Чат</span>
+        <span>✖</span>
+    </div>
+    <div id="chat-messages"></div>
+    <div class="chat-input">
+        <input type="text" id="chat-msg-input" placeholder="Нависед...">
+        <button onclick="app.sendMessage()" style="background:var(--success); color:white; border:none; border-radius:5px; margin-left:5px">➡</button>
+    </div>
+</div>
+
 <script>
-    // КОНФИГУРАТСИЯИ FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyCOYjoU34k2CDWVZd7D4XvhXAwgFK_LxlE",
-        authDomain: "automarkettj.firebaseapp.com",
         databaseURL: "https://automarkettj-default-rtdb.firebaseio.com",
         projectId: "automarkettj",
-        storageBucket: "automarkettj.firebasestorage.app",
-        messagingSenderId: "614498527268",
-        appId: "1:614498527268:web:ff06a8f246df42ac1ad0b1"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const auth = firebase.auth();
 
     const app = {
-        isAdmin: false,
-        isLoginMode: true,
-        carDatabase: {
-            "Toyota": ["Camry", "Corolla", "Prado", "Rav4"],
-            "Opel": ["Astra G", "Astra H", "Zafira", "Vectra"],
-            "Mercedes-Benz": ["W210", "W211", "W212", "Sprinter"],
-            "BMW": ["E39", "E60", "F10", "X5"],
-            "Hyundai": ["Elantra", "Sonata", "Santa Fe"],
-            "LADA": ["Priora", "Vesta", "2107", "Niva"]
-        },
+        user: JSON.parse(localStorage.getItem('user_v1')),
+        products: [],
+        currentChatId: null,
 
         init() {
-            this.fillBrands();
-            auth.onAuthStateChanged(async user => {
-                if(user) {
-                    db.ref('users/' + user.uid).on('value', snap => {
-                        const u = snap.val();
-                        this.isAdmin = u && u.role === 'admin';
-                        if(this.isAdmin) {
-                            document.getElementById('adminBtn').classList.remove('hidden');
-                            this.loadUsers(); 
-                        }
-                    });
-
-                    const statusRef = db.ref('users/' + user.uid + '/online');
-                    db.ref('.info/connected').on('value', s => {
-                        if(s.val()) { statusRef.onDisconnect().set(false); statusRef.set(true); }
-                    });
-
-                    document.getElementById('addBtn').classList.remove('hidden');
-                    document.getElementById('logoutLink').classList.remove('hidden');
-                    document.getElementById('loginLink').classList.add('hidden');
-                }
-            });
-            this.loadAds();
-            this.trackGlobal();
+            this.loadProducts();
+            this.updateUI();
         },
 
-        // Функсияи боргузории корбарон бо ҳисоби маблағ ва рамз
-        loadUsers() {
-            const search = document.getElementById('userSearch').value.toLowerCase();
+        updateUI() {
+            if(this.user) {
+                document.getElementById('loginLink').classList.add('hidden');
+                document.getElementById('addBtn').classList.remove('hidden');
+            }
+        },
+
+        showPage(id) {
+            ['home', 'login', 'requests'].forEach(p => document.getElementById(p + 'Page').classList.add('hidden'));
+            document.getElementById(id + 'Page').classList.remove('hidden');
+        },
+
+        // --- ЛОГИКАИ ЧАТ ---
+        openChat(sellerPhone, sellerName) {
+            if(!this.user) return alert("Аввал ворид шавед!");
+            if(this.user.phone === sellerPhone) return alert("Шумо ба худатон навишта наметавонед!");
             
-            // Аввал ҳамаи эълонҳоро мегирем, то маблағи ҳар як корбарро ҳисоб кунем
-            db.ref('products').on('value', adsSnap => {
-                const userSales = {};
-                adsSnap.forEach(ad => {
-                    const data = ad.val();
-                    if(data.uid) {
-                        userSales[data.uid] = (userSales[data.uid] || 0) + Number(data.price || 0);
-                    }
+            document.getElementById('chat-window').classList.remove('hidden');
+            document.getElementById('chat-with-name').innerText = sellerName;
+            
+            // Сохтани ID-и ягона барои чат байни ду нафар
+            this.currentChatId = [this.user.phone, sellerPhone].sort().join("_");
+            this.loadMessages();
+        },
+
+        sendMessage() {
+            const input = document.getElementById('chat-msg-input');
+            const text = input.value.trim();
+            if(!text || !this.currentChatId) return;
+
+            const msgData = {
+                sender: this.user.phone,
+                senderName: this.user.name,
+                text: text,
+                time: Date.now()
+            };
+
+            db.ref(`chats/${this.currentChatId}`).push(msgData);
+            input.value = "";
+        },
+
+        loadMessages() {
+            db.ref(`chats/${this.currentChatId}`).on('value', snap => {
+                const box = document.getElementById('chat-messages');
+                box.innerHTML = "";
+                snap.forEach(c => {
+                    const m = c.val();
+                    const type = m.sender === this.user.phone ? 'sent' : 'received';
+                    box.innerHTML += `<div class="msg ${type}"><b>${m.senderName}:</b><br>${m.text}</div>`;
                 });
-
-                // Акнун рӯйхати корбаронро мебарорем
-                db.ref('users').on('value', snap => {
-                    const list = document.getElementById('adminUsersList');
-                    if(!list) return;
-                    list.innerHTML = ""; let count = 0;
-
-                    snap.forEach(u => {
-                        const val = u.val();
-                        const uid = u.key;
-                        const totalMoney = userSales[uid] || 0;
-
-                        // Ҷустуҷӯ танҳо аз рӯи РАҚАМИ ТЕЛЕФОН
-                        if(!search || (val.phone && val.phone.includes(search))) {
-                            count++;
-                            list.innerHTML += `
-                                <div style="padding:15px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; background: white; margin-bottom: 5px; border-radius: 8px;">
-                                    <div>
-                                        <b style="font-size:1.1rem">${val.name || 'Бе ном'}</b> ${val.online ? '🟢' : '⚪'}<br>
-                                        <span>📞 Тел: <b>${val.phone || ''}</b></span><br>
-                                        <span style="color:var(--danger)">🔑 Рамз: <b>${val.pass || '***'}</b></span><br>
-                                        <span style="color:var(--success)">💰 Маблағи эълонҳо: <b>${totalMoney.toLocaleString()} с.</b></span>
-                                    </div>
-                                    <div>
-                                        ${val.role !== 'admin' ? `<button onclick="app.deleteUser('${uid}')" style="background:var(--danger); color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer;">Блок</button>` : '<b>Админ</b>'}
-                                    </div>
-                                </div>`;
-                        }
-                    });
-                    document.getElementById('countUsers').innerText = count;
-                });
+                box.scrollTop = box.scrollHeight;
             });
         },
 
-        async handleAuth() {
-            const phone = document.getElementById('regPhone').value;
-            const email = phone + "@zapchast.tj";
-            const pass = document.getElementById('regPass').value;
-            const name = document.getElementById('regName').value;
-            try {
-                if(this.isLoginMode) {
-                    await auth.signInWithEmailAndPassword(email, pass);
-                } else {
-                    const res = await auth.createUserWithEmailAndPassword(email, pass);
-                    // Дар базаи users 'pass'-ро илова кардем, то админ бинад
-                    await db.ref('users/' + res.user.uid).set({ 
-                        name: name, 
-                        phone: phone, 
-                        pass: pass, 
-                        role: 'user', 
-                        online: true 
-                    });
-                }
-                this.showPage('home');
-            } catch(e) { alert("Хато: " + e.message); }
-        },
-
-        // ДИГАР ФУНКСИЯҲО (fillBrands, updateModels, loadAds, showPage ва ғ.) БЕ ТАҒЙИР
-        fillBrands() {
-            const b = document.getElementById('pCarBrand');
-            const sb = document.getElementById('searchBrand');
-            Object.keys(this.carDatabase).forEach(k => {
-                const opt = `<option value="${k}">${k}</option>`;
-                b.innerHTML += opt;
-                sb.innerHTML += opt;
-            });
-        },
-        updateModels() {
-            const b = document.getElementById('pCarBrand').value;
-            const m = document.getElementById('pCarModel');
-            m.innerHTML = "";
-            if(this.carDatabase[b]) this.carDatabase[b].forEach(i => m.innerHTML += `<option value="${i}">${i}</option>`);
-        },
-        trackGlobal() {
-            db.ref('users').on('value', snap => {
-                let online = 0;
-                snap.forEach(c => { if(c.val().online === true) online++ });
-                if(document.getElementById('adminOnlineCount')) document.getElementById('adminOnlineCount').innerText = online;
-            });
-        },
-        async loadAds() {
-            const sName = document.getElementById('searchName').value.toLowerCase();
-            const sBrand = document.getElementById('searchBrand').value;
-            const sType = document.getElementById('searchType').value;
+        // --- ЭЪЛОНҲО ---
+        loadProducts() {
             db.ref('products').on('value', snap => {
                 const grid = document.getElementById('adsGrid');
                 grid.innerHTML = "";
-                let totalSum = 0; let count = 0;
-                snap.forEach(child => {
-                    const p = child.val();
-                    if((!sName || p.desc.toLowerCase().includes(sName)) && (!sBrand || p.brand === sBrand) && (!sType || p.type === sType)) {
-                        count++; totalSum += Number(p.price || 0);
-                        const isOwner = auth.currentUser && (auth.currentUser.uid === p.uid || this.isAdmin);
-                        grid.innerHTML += `<div class="card">
-                            ${isOwner ? `<button onclick="app.deleteAd('${child.key}')" style="position:absolute;right:10px;top:10px;background:red;color:white;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;z-index:10">🗑️</button>` : ''}
-                            <img src="${p.img || 'https://via.placeholder.com/300x200?text=No+Photo'}">
+                snap.forEach(c => {
+                    const p = c.val();
+                    grid.innerHTML += `
+                        <div class="card">
+                            <img src="${p.img || 'https://via.placeholder.com/300x180'}">
                             <div class="card-body">
-                                <small style="color:var(--accent)">${p.type || ''} | ${p.brand} ${p.model}</small>
-                                <h3 style="margin:5px 0">${p.brand} ${p.model}</h3>
-                                <b class="price-tag">${p.price} с.</b>
-                                <a href="tel:+992${p.phone}" class="btn-action" style="background:var(--primary); color:white;">📞 Занг</a>
+                                <h3>${p.name}</h3>
+                                <div style="color:var(--success); font-weight:bold">${p.price} c.</div>
+                                <div style="display:flex; gap:5px; margin-top:10px">
+                                    <a href="tel:${p.phone}" style="background:#3498db; color:white; flex:1; text-align:center; padding:5px; border-radius:5px; text-decoration:none">Занг</a>
+                                    <div class="btn-chat" onclick="app.openChat('${p.phone}', '${p.brand || 'Фурӯшанда'}')">Чат 💬</div>
+                                </div>
                             </div>
                         </div>`;
-                    }
                 });
-                if(document.getElementById('adminTotalValue')) document.getElementById('adminTotalValue').innerText = totalSum.toLocaleString();
-                if(document.getElementById('totalAdsCount')) document.getElementById('totalAdsCount').innerText = count;
             });
         },
-        showPage(id) {
-            document.querySelectorAll('.container > div').forEach(p => p.classList.add('hidden'));
-            document.getElementById(id + 'Page').classList.remove('hidden');
-            if(id === 'admin') this.loadUsers();
-        },
-        toggleAuthMode() {
-            this.isLoginMode = !this.isLoginMode;
-            document.getElementById('authTitle').innerText = this.isLoginMode ? "Воридшавӣ" : "Бақайдгирӣ";
-            document.getElementById('regNameDiv').classList.toggle('hidden', this.isLoginMode);
-        },
-        deleteAd(id) { if(confirm("Нест карда шавад?")) db.ref('products/' + id).remove(); },
-        deleteUser(id) { if(confirm("Блок карда шавад?")) db.ref('users/' + id).remove(); },
-        logout() { if(auth.currentUser) db.ref('users/' + auth.currentUser.uid + '/online').set(false); auth.signOut().then(() => location.reload()); }
+
+        auth() {
+            const name = document.getElementById('uName').value;
+            const phone = document.getElementById('uPhone').value;
+            localStorage.setItem('user_v1', JSON.stringify({name, phone}));
+            location.reload();
+        }
     };
-
-
-loadUsers() {
-    const search = document.getElementById('userSearch').value.toLowerCase();
-    
-    // 1. Аввал ҳисоб кардани маблағ ва миқдори эълонҳои ҳар як корбар
-    db.ref('products').once('value', adsSnap => {
-        const userStats = {};
-        adsSnap.forEach(ad => {
-            const data = ad.val();
-            if(data.uid) {
-                if(!userStats[data.uid]) userStats[data.uid] = { count: 0, total: 0 };
-                userStats[data.uid].count++;
-                userStats[data.uid].total += Number(data.price || 0);
-            }
-        });
-
-        // 2. Бор кардани рӯйхати корбарон
-        db.ref('users').on('value', snap => {
-            const list = document.getElementById('adminUsersList');
-            if(!list) return;
-            list.innerHTML = ""; 
-            let totalUsers = 0;
-            let onlineUsers = 0;
-
-            snap.forEach(u => {
-                const val = u.val();
-                const uid = u.key;
-                const stats = userStats[uid] || { count: 0, total: 0 };
-
-                if(val.online) onlineUsers++;
-                totalUsers++;
-
-                // Филтр аз рӯи телефон
-                if(!search || (val.phone && val.phone.includes(search))) {
-                    list.innerHTML += `
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 12px;">
-                                <b>${val.name || 'Номаълум'}</b> 
-                                ${val.online ? '<span style="color:green; font-size:12px;">● онлайн</span>' : '<span style="color:#ccc; font-size:12px;">○ офлайн</span>'}
-                            </td>
-                            <td style="padding: 12px;">${val.phone}</td>
-                            <td style="padding: 12px;"><code style="background:#fef9e7; padding:2px 5px;">${val.pass || '---'}</code></td>
-                            <td style="padding: 12px;">
-                                <span style="color:var(--accent); font-weight:bold;">${stats.count} адад</span><br>
-                                <small style="color:var(--success)">${stats.total.toLocaleString()} с.</small>
-                            </td>
-                            <td style="padding: 12px;">
-                                ${val.role !== 'admin' ? 
-                                `<button onclick="app.deleteUser('${uid}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.2rem;">🚫</button>` 
-                                : '<span style="font-size:12px; color:blue;">Админ</span>'}
-                            </td>
-                        </tr>`;
-                }
-            });
-            document.getElementById('countUsers').innerText = totalUsers;
-            document.getElementById('adminOnlineCount').innerText = onlineUsers;
-        });
-    });
-}
 
     app.init();
 </script>
 </body>
 </html>
-
