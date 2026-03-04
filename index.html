@@ -248,7 +248,7 @@ to{opacity:1; transform:translateY(0);}
 <body>
 
 <nav>
-<h2>Автодиагностика</h2>
+<h2>Автодиагностика <p>Шумораи меҳмонон: <span id="visitorCount">0</span></p></h2>
 <div class="menu-toggle" id="mobileMenu">&#9776;</div>
 <div class="nav-links" id="navLinks">
 <a href="#">Асосӣ</a>
@@ -266,12 +266,59 @@ to{opacity:1; transform:translateY(0);}
 </section>
 <section class="booking" id="booking">
   <h2>Фиристодани дархост ба WhatsApp</h2>
-  <input type="text" id="customerName" placeholder="Ном ва Насбат">
+  <input type="text" id="customerName" placeholder="Ном ва Насаб">
   <input type="tel" id="customerPhone" placeholder="Телефон">
   <input type="text" id="carModel" placeholder="Маркаи мошин">
   <textarea id="technicalIssue" placeholder="Мушкилоти техникии шумо" style="width:100%; padding:12px; margin:10px 0; border-radius:6px; border:1px solid #ddd; min-height:80px;"></textarea>
   <button onclick="sendToWhatsApp()">Фиристодан ба WhatsApp</button>
 </section>
+<!-- 1. Knowledge Base / Blog -->
+<section class="blog" id="blog" style="padding:60px 20px; background:#f9f9f9; text-align:center;">
+  <h2>Маълумотнома / Blog</h2>
+  <div class="blog-container" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:30px;">
+    <div class="blog-card" style="background:white; padding:20px; width:280px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.1); transition:0.3s;">
+      <h3>Чӣ тавр TPMS-ро санҷидан мумкин аст</h3>
+      <p>Қадамҳои осон барои санҷиши датчикҳои фишори шин ва таъмини амнияти ронандагӣ.</p>
+    </div>
+    <div class="blog-card" style="background:white; padding:20px; width:280px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.1); transition:0.3s;">
+      <h3>Нишонаҳои мушкили муҳаррик</h3>
+      <p>Кадом аломатҳо нишон медиҳанд, ки муҳаррик ба таъмир ниёз дорад ва чӣ кор бояд кард.</p>
+    </div>
+    <div class="blog-card" style="background:white; padding:20px; width:280px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.1); transition:0.3s;">
+      <h3>Чӣ тавр равғани аслиро интихоб кунем</h3>
+      <p>Роҳнамои интихоб ва нигоҳдории равған барои дароз кардани мӯҳлати хизмати муҳаррик.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2. FAQ / Accordion -->
+<section class="faq" id="faq" style="padding:60px 20px; background:white;">
+  <h2 style="text-align:center; margin-bottom:30px;">FAQ</h2>
+  <div style="max-width:700px; margin:0 auto;">
+    <div class="accordion">
+      <button class="accordion-btn">TPMS чӣ гуна кор мекунад?</button>
+      <div class="accordion-content">
+        <p>Датчикҳои фишори шин маълумотро ба компютери мошин мефиристанд ва ҳангоми кам ё зиёд шудани фишор огоҳӣ медиҳанд.</p>
+      </div>
+      <button class="accordion-btn">Сабабҳои кам кардани фишори шин</button>
+      <div class="accordion-content">
+        <p>Хатогиҳои насб, сӯрохшавии шин, тағйири ҳарорат ва ё фарсудашавии шин метавонад сабаб гардад.</p>
+      </div>
+      <button class="accordion-btn">Мӯҳлати иваз кардани равған</button>
+      <div class="accordion-content">
+        <p>Мувофиқи дастурҳои истеҳсолкунанда, ҳар 5000-10000 км ё як сол равған иваз карда шавад.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Floating Button -->
+<a href="https://wa.me/992501011301" target="_blank" style="
+position:fixed; bottom:20px; right:20px; background:#25D366; color:white; padding:16px 20px; border-radius:50px; text-decoration:none; font-size:20px; box-shadow:0 5px 15px rgba(0,0,0,0.3); z-index:9999;">
+💬 WhatsApp
+</a>
+
+<!-- 4. Visitor Counter -->
 
 <section class="services" id="services">
 <h2>Хизматрасониҳои мо</h2>
@@ -379,19 +426,48 @@ style="display:inline-block;padding:12px 25px;background:#28a745;color:white;tex
 </div>
 
 <script>
+    // Accordion
+const accBtns = document.querySelectorAll(".accordion-btn");
+accBtns.forEach(btn => {
+  btn.addEventListener("click", function(){
+    this.classList.toggle("active");
+    const panel = this.nextElementSibling;
+    if(panel.style.maxHeight){
+      panel.style.maxHeight = null;
+    } else {
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    }
+  });
+});
+
+// Visitor Counter (localStorage simple version)
+let count = localStorage.getItem('visitorCount') || 0;
+count++;
+localStorage.setItem('visitorCount', count);
+document.getElementById('visitorCount').textContent = count;
+
+// Hover effect for Blog cards
+document.querySelectorAll(".blog-card").forEach(card=>{
+  card.addEventListener("mouseenter", ()=>{card.style.transform="translateY(-10px)"; card.style.boxShadow="0 10px 25px rgba(0,0,0,0.2)";});
+  card.addEventListener("mouseleave", ()=>{card.style.transform="translateY(0)"; card.style.boxShadow="0 5px 15px rgba(0,0,0,0.1)";});
+});
     function sendToWhatsApp(){
   const name = document.getElementById("customerName").value.trim();
   const phone = document.getElementById("customerPhone").value.trim();
   const car = document.getElementById("carModel").value.trim();
   const issue = document.getElementById("technicalIssue").value.trim();
+  const image = document.getElementById("carImage").value.trim();
 
   if(!name || !phone || !car || !issue){
-    alert("Ҳамаи майдонҳоро пур кунед!");
+    alert("Ҳамаи майдонҳо ҳатмӣ пур кунед!");
     return;
   }
 
-  const whatsappNumber = "+992501011301"; // рақами шумо
-  const message = `🛠 Навбат нав!\n\n👤 Ном ва насб: ${name}\n📞 Телефон: ${phone}\n🚗 Маркаи мошин: ${car}\n📝 Мушкилоти техники: ${issue}`;
+  let message = `🛠 муштарии нав!\n\n👤 Ном ва насаб: ${name}\n📞 Телефон: ${phone}\n🚗 Маркаи мошин: ${car}\n📝 Мушкилоти техники: ${issue}`;
+  
+  if(image) message += `\n🖼 Расм: ${image}`;
+
+  const whatsappNumber = "+992501011301";
   const url = `https://wa.me/${whatsappNumber.replace(/\+/g,'')}?text=${encodeURIComponent(message)}`;
   
   window.open(url, "_blank");
