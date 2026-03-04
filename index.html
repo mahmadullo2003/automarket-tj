@@ -1,234 +1,437 @@
 <!DOCTYPE html>
 <html lang="tg">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoMarket TJ | v1.9 Ultimate</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        :root { --main-blue: #0061ff; --search-orange: #fd7e14; }
-        body { background: #f4f7f6; padding-bottom: 80px; font-family: 'Segoe UI', sans-serif; }
-        .navbar-custom { background: white; padding: 15px; border-bottom: 2px solid #eee; }
-        .part-card { border: none; border-radius: 15px; background: white; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; height: 100%; }
-        .part-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .card-img { height: 180px; object-fit: cover; width: 100%; }
-        .want-to-buy-card { border: 2px dashed var(--search-orange) !important; background: #fffaf5; }
-        .auth-box { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; padding: 12px; z-index: 1000; }
-        @media (min-width: 769px) { .bottom-nav { display: none; } }
-        .nav-pills .nav-link.active { background-color: var(--main-blue); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Автодиагностика</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+scroll-behavior:smooth;
+}
+
+body{
+background:#f5f5f5;
+}
+
+/* NAVBAR */
+nav{
+background:#111;
+color:white;
+padding:15px 50px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+position:sticky;
+top:0;
+z-index:1000;
+}
+
+nav h2{
+    color:white;
+    font-size:20px;
+}
+
+.nav-links{
+display:flex;
+gap:20px;
+}
+
+nav a{
+color:white;
+text-decoration:none;
+margin-left:20px;
+transition:0.3s;
+}
+
+nav a:hover{
+color:#28a745;
+}
+
+/* BURGER MENU */
+.menu-toggle {
+    display: none;
+    font-size:28px;
+    cursor:pointer;
+    color:white;
+}
+
+/* HERO */
+.hero{
+background:linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),
+url('https://images.unsplash.com/photo-1515923162032-3c4f4c8e1f1c');
+background-size:cover;
+background-position:center;
+color:white;
+text-align:center;
+padding:120px 20px;
+animation:fadeIn 2s ease;
+}
+
+.hero h1{
+font-size:42px;
+margin-bottom:15px;
+}
+
+.hero button{
+padding:12px 25px;
+background:#28a745;
+border:none;
+color:white;
+cursor:pointer;
+border-radius:5px;
+font-size:16px;
+transition:0.3s;
+}
+
+.hero button:hover{
+transform:scale(1.05);
+background:#218838;
+}
+
+/* SERVICES */
+.services{
+padding:60px 20px;
+text-align:center;
+}
+.malumot{
+padding:60px 20px;
+text-align:center;
+
+}
+.mlm{
+background:white;
+padding:25px;
+width:280px;
+border-radius:12px;
+box-shadow:0 10px 20px rgba(0,0,0,0.1);
+transition:0.4s;
+}
+
+.service-container{
+display:flex;
+justify-content:center;
+gap:20px;
+flex-wrap:wrap;
+}
+
+.service-card{
+background:white;
+padding:25px;
+width:280px;
+border-radius:12px;
+box-shadow:0 10px 20px rgba(0,0,0,0.1);
+transition:0.4s;
+}
+
+.service-card:hover{
+transform:translateY(-10px);
+background-color: green;
+text-decoration-color: black;
+}
+
+/* LOCATION */
+.location{
+padding:60px 20px;
+text-align:center;
+background:white;
+}
+
+.location iframe{
+width:100%;
+max-width:800px;
+height:400px;
+border-radius:10px;
+margin-top:20px;
+}
+
+/* BOOKING */
+.booking{
+background:white;
+padding:40px;
+max-width:420px;
+margin:60px auto;
+border-radius:12px;
+box-shadow:0 10px 20px rgba(0,0,0,0.1);
+animation:fadeInUp 1.5s ease;
+}
+
+.booking input,.booking button{
+width:100%;
+padding:12px;
+margin:10px 0;
+border-radius:6px;
+border:1px solid #ddd;
+}
+
+.booking button{
+background:#28a745;
+border:none;
+color:white;
+cursor:pointer;
+transition:0.3s;
+}
+
+.booking button:hover{
+background:#218838;
+transform:scale(1.03);
+}
+
+footer{
+background:#111;
+color:white;
+text-align:center;
+padding:20px;
+margin-top:40px;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn{
+from{opacity:0;}
+to{opacity:1;}
+}
+
+@keyframes fadeInUp{
+from{opacity:0; transform:translateY(40px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+/* Engineer Panel Hover */
+#contactPanel a:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #28a745, 0 0 30px #28a745 inset;
+}
+
+#contactPanel a[href*="wa.me"]:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #25D366, 0 0 30px #25D366 inset;
+}
+
+#closeContact:hover {
+    color:#218838;
+    transform: scale(1.2);
+}
+
+/* BURGER MENU RESPONSIVE */
+@media screen and (max-width:768px){
+    .menu-toggle {
+        display:block;
+    }
+    .nav-links{
+        position:fixed;
+        top:60px;
+        left:-100%;
+        background:#111;
+        width:100%;
+        height:100%;
+        flex-direction:column;
+        padding-top:50px;
+        transition:0.3s;
+        z-index:1500;
+    }
+    .nav-links a{
+        margin:15px 0;
+        text-align:center;
+        font-size:20px;
+    }
+    .nav-links.active{
+        left:0;
+    }
+}
+</style>
 </head>
+
 <body>
 
-<nav class="navbar-custom sticky-top d-flex justify-content-between align-items-center px-4">
-    <a href="#" class="fw-bold text-primary fs-4 text-decoration-none">AutoMarketTJ <span class="badge bg-light text-muted" style="font-size: 10px;">v1.9</span></a>
-    <div id="userSection"></div>
+<nav>
+<h2>Автодиагностика</h2>
+<div class="menu-toggle" id="mobileMenu">&#9776;</div>
+<div class="nav-links" id="navLinks">
+<a href="#">Асосӣ</a>
+<a href="#services">Хизматҳо</a>
+<a href="#location">Ҷойгиршавӣ</a>
+<a href="#booking">Тамос</a>
+<a href="#engineer">Дар бораи мутахасис</a>
+</div>
 </nav>
 
-<div class="container mt-4">
-    <div id="authUI" class="auth-box d-none">
-        <h4 class="fw-bold text-center mb-4">Хуш омадед</h4>
-        <input type="text" id="authName" class="form-control mb-2" placeholder="Номи шумо">
-        <input type="text" id="authPhone" class="form-control mb-2" placeholder="Рақами телефон (933099029)">
-        <input type="password" id="authPass" class="form-control mb-3" placeholder="Парол (мин. 6 аломат)">
-        <button class="btn btn-primary w-100 mb-2" onclick="handleAuth('login')">Ворид шудан</button>
-        <button class="btn btn-outline-primary w-100" onclick="handleAuth('register')">Бақайдгирӣ</button>
-    </div>
+<section class="hero">
+<h1>Таъмири касбии мошинҳо</h1>
+<p>Сифат • Суръат • Кафолат</p>
+<br>
+</section>
+<section class="booking" id="booking">
+  <h2>Фиристодани дархост ба WhatsApp</h2>
+  <input type="text" id="customerName" placeholder="Ном ва Насбат">
+  <input type="tel" id="customerPhone" placeholder="Телефон">
+  <input type="text" id="carModel" placeholder="Маркаи мошин">
+  <textarea id="technicalIssue" placeholder="Мушкилоти техникии шумо" style="width:100%; padding:12px; margin:10px 0; border-radius:6px; border:1px solid #ddd; min-height:80px;"></textarea>
+  <button onclick="sendToWhatsApp()">Фиристодан ба WhatsApp</button>
+</section>
 
-    <ul class="nav nav-pills nav-justified mb-4 shadow-sm bg-white rounded-pill p-1">
-        <li class="nav-item">
-            <button class="nav-link active rounded-pill" data-bs-toggle="pill" data-bs-target="#sell-list">🛒 Фурӯш</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link rounded-pill" data-bs-toggle="pill" data-bs-target="#buy-list">🔍 Меҷӯянд</button>
-        </li>
-    </ul>
+<section class="services" id="services">
+<h2>Хизматрасониҳои мо</h2>
+<br><br>
+<div class="service-container">
 
-    <div class="tab-content">
-        <div class="tab-pane fade show active" id="sell-list"><div id="productUI" class="row"></div></div>
-        <div class="tab-pane fade" id="buy-list"><div id="requestUI" class="row"></div></div>
-    </div>
+<div class="service-card">
+<h3>Диагностика</h3>
+<p>Ташхиси пурраи компютерии мошин.  
+Бо истифода аз таҷҳизоти замонавӣ ва сканерҳои махсус, ҳама системҳои электронӣ ва муҳандисии мошин тафтиш мешаванд: муҳаррик, тормоз, трансмиссия, датчикҳои фишори шин ва дигар системаҳоро пурра таҳлил мекунем.  
+Ин ба шумо имкон медиҳад, ки пеш аз камбудиҳои ҷиддӣ онҳоро пайдо кунед ва сари вақт ислоҳ кунед.</p>
 </div>
 
-<div class="bottom-nav shadow-lg">
-    <a href="#" onclick="location.reload()" class="text-primary fs-4"><i class="bi bi-house-door-fill"></i></a>
-    <button class="btn text-secondary fs-4 p-0" data-bs-toggle="modal" data-bs-target="#addModal"><i class="bi bi-plus-square"></i></button>
-    <a href="#" onclick="showAuth()" class="text-secondary fs-4"><i class="bi bi-person"></i></a>
+<div class="service-card">
+<h3>Таъмири қисми электронии муҳаррик</h3>
+<p>Хизматрасонии пурраи таъмир ва танзими системаҳои электронӣ ва электроникии муҳаррик.  
+Муҳандисони мо ҳамаи датчикҳо, сензорҳо, ECU (модули идораи муҳаррик) ва системаҳои барқро тафтиш ва ислоҳ мекунанд.  
+Ин ба шумо имкон медиҳад, ки муҳаррик бо иҷрои баланд ва бидуни камбуди кор кунад, сӯзишворӣ самаранок истифода шавад ва амнияти ронандагӣ баланд шавад.  
+Ҳар хизматрасонӣ бо таҷҳизоти замонавӣ ва таҷрибаи муҳандисони касбӣ анҷом дода мешавад.</p>
 </div>
 
-<div class="modal fade" id="addModal" tabindex="-1">
-    <div class="modal-dialog modal-lg border-0">
-        <div class="modal-content rounded-4 border-0">
-            <div class="modal-header border-0">
-                <h5 class="fw-bold">Эълони нав</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <select id="postType" class="form-select mb-3 border-primary">
-                    <option value="sell">Мефурӯшам (Эълони оддӣ)</option>
-                    <option value="buy">Меҷӯям (Эълони ҷустуҷӯ)</option>
-                </select>
-                <div class="row g-2">
-                    <div class="col-6">
-                        <select id="carBrand" class="form-select" onchange="updateModels()">
-                            <option value="">Марка</option>
-                            <option value="Toyota">Toyota</option>
-                            <option value="BMW">BMW</option>
-                            <option value="Mercedes">Mercedes</option>
-                            <option value="Opel">Opel</option>
-                        </select>
-                    </div>
-                    <div class="col-6"><select id="carModel" class="form-select"><option>Модел</option></select></div>
-                    <div class="col-12"><input type="text" id="partName" class="form-control" placeholder="Номи қисм"></div>
-                    <div class="col-6"><input type="number" id="partPrice" class="form-control" placeholder="Нарх"></div>
-                    <div class="col-6"><input type="text" id="userPhoneInput" class="form-control" readonly placeholder="Рақами шумо"></div>
-                    <div class="col-12"><textarea id="description" class="form-control" placeholder="Тавсифи қисм..."></textarea></div>
-                    <div class="col-12"><input type="file" id="partImage" class="form-control"></div>
-                </div>
-                <button class="btn btn-primary w-100 mt-3 py-2 fw-bold" onclick="uploadProduct()">НАШР КАРДАН</button>
-            </div>
-        </div>
-    </div>
+<div class="service-card">
+<h3>Фишори датчикҳои шин (TPMS)</h3>
+<p>Хизматрасонии насб, санҷиш ва прошивкаи датчикҳои фишори шин.  
+Мо фишори ҳар як шинаи мошини шуморо дақиқ назорат мекунем ва бо таҷҳизоти махсус ҳар гуна хато ё камбудиро муайян мекунем.  
+Истифодаи TPMS ба шумо кӯмак мекунад, ки ҳаёти шинҳоро дароз кунед, истеъмоли сӯзишворӣ кам шавад ва амнияти ронандагиро баланд бардорад.  
+Ҳар хизматрасонӣ бо дақиқӣ ва бо таҷрибаи муҳандисони касбӣ анҷом дода мешавад.</p>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+</div>
+</section>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCOYjoU34k2CDWVZd7D4XvhXAwgFK_LxlE",
-        authDomain: "automarkettj.firebaseapp.com",
-        projectId: "automarkettj",
-        storageBucket: "automarkettj.firebasestorage.app",
-        messagingSenderId: "614498527268",
-        appId: "1:614498527268:web:ff06a8f246df42ac1ad0b1"
-    };
+<section class="malumot" id="malumot">
+    <div class="malm"></div>
+</section>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+<section class="location" id="location">
+<h2>Мавқеи ҷойгиршавӣ</h2>
+<p>Tpms_Tajikistan — Душанбе / Кушониён</p>
 
-    // АВТОРИЗАТСИЯ БО ТЕЛЕФОН (v1.7)
-    window.handleAuth = async (type) => {
-        const name = document.getElementById('authName').value;
-        const phone = document.getElementById('authPhone').value.trim();
-        const pass = document.getElementById('authPass').value;
-        const email = `${phone}@auto.tj`;
+<iframe src="https://maps.google.com/maps?q=Tpms_Tajikistan Душанбе Кушониён&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe>
 
-        if(phone.length < 9 || pass.length < 6) return alert("Рақам ё парол (мин. 6 аломат) хатост!");
+<br><br>
 
-        try {
-            if(type === 'register') {
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await updateProfile(res.user, { displayName: name });
-            } else { 
-                await signInWithEmailAndPassword(auth, email, pass); 
-            }
-            location.reload();
-        } catch (e) { alert("Хатогӣ: " + e.message); }
-    };
+<a href="https://g.page/r/CV3aFerHUNDKEBI/review" target="_blank"
+style="display:inline-block;padding:12px 25px;background:#28a745;color:white;text-decoration:none;border-radius:8px;transition:0.3s;">
+⭐ Оставить отзыв в Google
+</a>
 
-    window.showAuth = () => document.getElementById('authUI').classList.toggle('d-none');
-    window.logout = () => signOut(auth).then(() => location.reload());
+</section>
 
-    onAuthStateChanged(auth, (user) => {
-        const userSec = document.getElementById('userSection');
-        if (user) {
-            userSec.innerHTML = `<span class="me-2 small fw-bold">${user.displayName || user.email.split('@')[0]}</span><button class="btn btn-sm btn-outline-danger" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>`;
-            document.getElementById('userPhoneInput').value = user.email.split('@')[0];
-            document.getElementById('authUI').classList.add('d-none');
-            loadProducts();
-        } else {
-            userSec.innerHTML = `<button class="btn btn-primary btn-sm" onclick="showAuth()">Ворид шудан</button>`;
-        }
-    });
+<footer>
+© 2026 Автодиагностика
+</footer>
 
-    window.updateModels = () => {
-        const brand = document.getElementById('carBrand').value;
-        const modelSel = document.getElementById('carModel');
-        const models = {
-            'Toyota': ['Camry', 'Corolla', 'Rav4', 'Prado', 'Land Cruiser'],
-            'BMW': ['X5', 'X6', 'E34', 'E39', 'E60', 'F10', 'M5'],
-            'Mercedes': ['C-Class', 'E-Class', 'S-Class', 'Sprinter', 'G-Wagen'],
-            'Opel': ['Astra', 'Zafira', 'Vectra', 'Corsa']
-        };
-        modelSel.innerHTML = '<option>Модел</option>';
-        if(models[brand]) models[brand].forEach(m => modelSel.innerHTML += `<option value="${m}">${m}</option>`);
-    };
+<!-- Engineer Slide-in Panel -->
+<div id="engineerPanel" style="
+    position:fixed;
+    top:0;
+    right:-400px;
+    width:400px;
+    height:100%;
+    background:white;
+    box-shadow:-5px 0 20px rgba(0,0,0,0.3);
+    z-index:2000;
+    transition:right 0.5s ease;
+    overflow-y:auto;
+    padding:30px;
+    font-family:Arial,sans-serif;
+">
+<span id="closeEngineer" style="position:absolute;top:15px;right:15px;font-size:24px;cursor:pointer;">&times;</span>
+<h2>Муҳандис</h2>
+<img src="https://images.unsplash.com/photo-1581090700227-9d6a2b84e158" alt="Муҳандис" style="width:100%; border-radius:10px; margin:15px 0;">
+<p style="line-height:1.8; font-size:16px;">
+Муҳандисони мо таҷрибаи бой дар таъмири мошинҳо ва прошивкаи датчикҳои фишори шин доранд. 
+Ҳар хизматрасонӣ бо дақиқӣ ва касбӣ анҷом дода мешавад. 
+Барои саволҳо ва машварат, шумо метавонед мустақиман бо онҳо тамос гиред.
+</p>
+</div>
 
-    window.deletePost = async (id) => {
-        if(confirm("Оё мехоҳед ин эълонро нест кунед?")) {
-            try {
-                await deleteDoc(doc(db, "posts", id));
-                location.reload();
-            } catch (e) { alert("Хатогӣ ҳангоми нест кардан"); }
-        }
-    };
+<!-- Contact Options Panel -->
+<div id="contactPanel" style="
+    position:fixed;
+    top:0;
+    left:-320px;
+    width:320px;
+    height:100%;
+    background:#fff;
+    box-shadow:0 0 20px rgba(0,0,0,0.3), 0 0 40px rgba(40,167,69,0.5);
+    border-left:5px solid #28a745;
+    z-index:2000;
+    transition:left 0.6s ease, box-shadow 0.3s ease;
+    overflow-y:auto;
+    padding:30px;
+    font-family:Arial,sans-serif;
+">
+<span id="closeContact" style="position:absolute;top:15px;right:15px;font-size:28px;cursor:pointer;color:#28a745;transition:0.3s;">&times;</span>
 
-    window.uploadProduct = async () => {
-        if(!auth.currentUser) return alert("Аввал ворид шавед!");
-        const type = document.getElementById('postType').value;
-        const file = document.getElementById('partImage').files[0];
-        const name = document.getElementById('partName').value;
-        const brand = document.getElementById('carBrand').value;
-        const model = document.getElementById('carModel').value;
-        const price = document.getElementById('partPrice').value || "Мувофиқа";
-        const phone = document.getElementById('userPhoneInput').value;
+<h2 style="color:#28a745; text-align:center;">Тамос бо мо</h2>
+<p style="text-align:center; line-height:1.8;">Барои машварат, як варианти зерро интихоб кунед:</p>
 
-        if(!name) return alert("Номи қисмро нависед!");
+<a href="tel:+992501011301" style="display:block;margin:15px 0;padding:14px;background:#28a745;color:white;text-decoration:none;border-radius:8px;text-align:center;font-weight:bold;box-shadow:0 0 10px #28a745,0 0 20px #28a745 inset;transition:0.3s;">📞 Телефон</a>
 
-        let url = "";
-        if(file) {
-            const sRef = ref(storage, `parts/${Date.now()}_${file.name}`);
-            await uploadBytes(sRef, file);
-            url = await getDownloadURL(sRef);
-        }
+<a href="https://wa.me/992501011301" target="_blank" style="display:block;margin:15px 0;padding:14px;background:#25D366;color:white;text-decoration:none;border-radius:8px;text-align:center;font-weight:bold;box-shadow:0 0 10px #25D366,0 0 20px #25D366 inset;transition:0.3s;">💬 WhatsApp</a>
+</div>
 
-        await addDoc(collection(db, "posts"), {
-            type, name, brand, model, price, phone, image: url, owner: auth.currentUser.email, date: new Date()
-        });
-        location.reload();
-    };
+<script>
+    function sendToWhatsApp(){
+  const name = document.getElementById("customerName").value.trim();
+  const phone = document.getElementById("customerPhone").value.trim();
+  const car = document.getElementById("carModel").value.trim();
+  const issue = document.getElementById("technicalIssue").value.trim();
 
-    async function loadProducts() {
-        const q = query(collection(db, "posts"), orderBy("date", "desc"));
-        const snap = await getDocs(q);
-        const sellList = document.getElementById('productUI');
-        const buyList = document.getElementById('requestUI');
-        sellList.innerHTML = ""; buyList.innerHTML = "";
+  if(!name || !phone || !car || !issue){
+    alert("Ҳамаи майдонҳоро пур кунед!");
+    return;
+  }
 
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
-            const id = docSnap.id;
-            const isOwner = auth.currentUser && auth.currentUser.email === data.owner;
-            const cardHtml = `
-                <div class="col-6 col-md-4 col-lg-3 mb-4">
-                    <div class="part-card card ${data.type === 'buy' ? 'want-to-buy-card' : ''}">
-                        ${data.image ? `<img src="${data.image}" class="card-img">` : `<div class="bg-light text-center py-5"><i class="bi bi-search fs-1 text-muted"></i></div>`}
-                        <div class="p-3">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h6 class="fw-bold mb-1">${data.name}</h6>
-                                ${isOwner ? `<button onclick="deletePost('${id}')" class="btn btn-sm text-danger p-0 border-0 bg-transparent"><i class="bi bi-trash"></i></button>` : ''}
-                            </div>
-                            <p class="small text-muted mb-2">${data.brand} ${data.model}</p>
-                            <div class="d-flex justify-content-between align-items-center mt-auto">
-                                <span class="fw-bold text-primary">${data.price} TJS</span>
-                                <a href="https://wa.me/${data.phone}" class="btn btn-sm btn-success rounded-circle"><i class="bi bi-whatsapp"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            if(data.type === 'sell') sellList.innerHTML += cardHtml;
-            else buyList.innerHTML += cardHtml;
-        });
-    }
+  const whatsappNumber = "+992501011301"; // рақами шумо
+  const message = `🛠 Навбат нав!\n\n👤 Ном ва насб: ${name}\n📞 Телефон: ${phone}\n🚗 Маркаи мошин: ${car}\n📝 Мушкилоти техники: ${issue}`;
+  const url = `https://wa.me/${whatsappNumber.replace(/\+/g,'')}?text=${encodeURIComponent(message)}`;
+  
+  window.open(url, "_blank");
+}
+// BURGER MENU
+const mobileMenu = document.getElementById("mobileMenu");
+const navLinks = document.getElementById("navLinks");
+mobileMenu.addEventListener("click", () => { navLinks.classList.toggle("active"); });
+navLinks.querySelectorAll("a").forEach(link => { link.addEventListener("click", () => { if(navLinks.classList.contains("active")) navLinks.classList.remove("active"); }); });
+
+// Contact Panel
+const contactPanel = document.getElementById("contactPanel");
+const closeContact = document.getElementById("closeContact");
+document.querySelector('a[href="#booking"]').addEventListener("click", function(e){
+    e.preventDefault();
+    contactPanel.style.left = "0";
+    setTimeout(()=>{ document.getElementById("booking").scrollIntoView({behavior:"smooth"}); }, 1500);
+});
+closeContact.addEventListener("click", function(){ contactPanel.style.left = "-320px"; });
+
+// Engineer Panel
+const engineerPanel = document.getElementById("engineerPanel");
+const closeEngineer = document.getElementById("closeEngineer");
+document.querySelector('a[href="#engineer"]').addEventListener("click", function(e){
+    e.preventDefault();
+    engineerPanel.style.right = "0";
+});
+closeEngineer.addEventListener("click", function(){ engineerPanel.style.right = "-400px"; });
+
+// Booking function
+function bookService(){
+let name=document.getElementById("name")?.value;
+let phone=document.getElementById("phone")?.value;
+let date=document.getElementById("date")?.value;
+if(!name||!phone||!date){ alert("Ҳамаи майдонҳоро пур кунед!"); return; }
+let token="TOKEN_ТУ_ИНҶО"; let chat_id="CHAT_ID_ТУ_ИНҶО";
+let message="🛠 Навбат нав!\n\n👤 Ном: "+name+"\n📞 Телефон: "+phone+"\n📅 Сана: "+date;
+fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:chat_id,text:message})}).then(r=>alert("Дархост фиристода шуд!")).catch(e=>alert("Хато шуд!"));
+}
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
